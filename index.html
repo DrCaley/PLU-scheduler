@@ -11,50 +11,70 @@
     <div id="login-screen" class="screen">
         <div class="login-box">
             <h1>PLU Schedule Planner</h1>
-            <form id="login-form">
-                <input type="text" id="username" placeholder="Username" required>
-                <input type="password" id="password" placeholder="Password" required>
-                <button type="submit">Login</button>
-                <p class="register-link">Don't have an account? <a href="#" id="show-register">Register</a></p>
-            </form>
+            <p class="login-subtitle">Sign in with your PLU Google account</p>
+            <button id="google-signin-btn" class="google-btn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                Sign in with Google
+            </button>
+            <p class="login-note">Requires @plu.edu email address</p>
         </div>
     </div>
 
-    <!-- Register Screen -->
-    <div id="register-screen" class="screen hidden">
+    <!-- Profile Setup Screen (for new users) -->
+    <div id="setup-screen" class="screen hidden">
         <div class="login-box">
-            <h1>Create Account</h1>
-            <form id="register-form">
-                <input type="text" id="reg-username" placeholder="Username" required>
-                <input type="password" id="reg-password" placeholder="Password" required>
-                <input type="text" id="reg-name" placeholder="Full Name" required>
-                <label class="checkbox-label">
-                    <input type="checkbox" id="reg-faculty"> I am faculty/advisor
-                </label>
-                <div id="student-fields">
-                    <select id="reg-start-year" required>
-                        <option value="">Starting Year</option>
-                        <option value="2024">2024</option>
-                        <option value="2025">2025</option>
-                        <option value="2026">2026</option>
-                    </select>
-                    <select id="reg-major" required>
-                        <option value="">Major</option>
-                        <option value="CSCI">Computer Science</option>
-                        <option value="MATH">Mathematics</option>
-                        <option value="BIOL">Biology</option>
-                        <option value="CHEM">Chemistry</option>
-                        <option value="PHYS">Physics</option>
-                        <option value="ENGL">English</option>
-                        <option value="HIST">History</option>
-                        <option value="OTHER">Other</option>
+            <h1>Complete Your Profile</h1>
+            <form id="setup-form">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="setup-name" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="setup-email" readonly>
+                </div>
+                <div class="form-group">
+                    <label>I am a...</label>
+                    <select id="setup-role" required>
+                        <option value="">Select role</option>
+                        <option value="student">Student</option>
+                        <option value="faculty">Faculty/Advisor</option>
                     </select>
                 </div>
-                <div id="faculty-fields" class="hidden">
-                    <input type="text" id="reg-department" placeholder="Department">
+                <div id="student-setup-fields" class="hidden">
+                    <div class="form-group">
+                        <label>Starting Year</label>
+                        <select id="setup-start-year">
+                            <option value="">Select year</option>
+                            <option value="2022">2022</option>
+                            <option value="2023">2023</option>
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                            <option value="2026">2026</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Major</label>
+                        <select id="setup-major">
+                            <option value="">Select major</option>
+                            <option value="CSCI">Computer Science</option>
+                            <option value="MATH">Mathematics</option>
+                            <option value="BIOL">Biology</option>
+                            <option value="CHEM">Chemistry</option>
+                            <option value="PHYS">Physics</option>
+                            <option value="ENGL">English</option>
+                            <option value="HIST">History</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </div>
                 </div>
-                <button type="submit">Create Account</button>
-                <p class="register-link"><a href="#" id="show-login">Back to Login</a></p>
+                <div id="faculty-setup-fields" class="hidden">
+                    <div class="form-group">
+                        <label>Department</label>
+                        <input type="text" id="setup-department" placeholder="e.g., Computer Science">
+                    </div>
+                </div>
+                <button type="submit">Complete Setup</button>
             </form>
         </div>
     </div>
@@ -172,6 +192,13 @@
     </div>
 
     <script src="courses.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <script src="firebase-config.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

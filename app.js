@@ -1,70 +1,73 @@
-// PLU Schedule Planner - Main Application
+// PLU Schedule Planner - Firebase Version
 
 // State
 let currentUser = null;
+let userProfile = null;
 let scheduleData = {};
 let selectedTerm = null;
-let editingStudentUsername = null; // Track which student's schedule faculty is editing
+let editingStudentId = null;
+
+// Firebase references
+let db = null;
+let auth = null;
 
 // DOM Elements
 const loginScreen = document.getElementById('login-screen');
-const registerScreen = document.getElementById('register-screen');
+const setupScreen = document.getElementById('setup-screen');
 const scheduleScreen = document.getElementById('schedule-screen');
 const facultyScreen = document.getElementById('faculty-screen');
 const courseModal = document.getElementById('course-modal');
 
-// Initialize
+// Initialize Firebase
 document.addEventListener('DOMContentLoaded', () => {
-    // Check for existing session
-    const savedUser = localStorage.getItem('plu_current_user');
-    if (savedUser) {
-        currentUser = JSON.parse(savedUser);
-        if (currentUser.isFaculty) {
-            showFacultyScreen();
+    // Initialize Firebase
+    firebase.initializeApp(window.firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.firestore();
+    
+    // Auth state listener
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            currentUser = user;
+            
+            // Check email domain
+            const emailDomain = user.email.split('@')[1];
+            if (emailDomain !== window.ALLOWED_DOMAIN) {
+                alert(`Access restricted to @${window.ALLOWED_DOMAIN} email addresses.`);
+                await auth.signOut();
+                return;
+            }
+            
+            // Check if user has a profile
+            const profile = await getUserProfile(user.uid);
+            if (profile) {
+                userProfile = profile;
+                if (userProfile.role === 'faculty') {
+                    showFacultyScreen();
+                } else {
+                    await loadSchedule();
+                    showScheduleScreen();
+                }
+            } else {
+                // New user - show setup screen
+                showSetupScreen(user);
+            }
         } else {
-            loadSchedule();
-            showScheduleScreen();
+            currentUser = null;
+            userProfile = null;
+            showLoginScreen();
         }
-    }
-
+    });
+    
     // Event listeners
-    document.getElementById('login-form').addEventListener('submit', handleLogin);
-    document.getElementById('register-form').addEventListener('submit', handleRegister);
-    document.getElementById('show-register').addEventListener('click', (e) => {
-        e.preventDefault();
-        loginScreen.classList.add('hidden');
-        registerScreen.classList.remove('hidden');
-    });
-    document.getElementById('show-login').addEventListener('click', (e) => {
-        e.preventDefault();
-        registerScreen.classList.add('hidden');
-        loginScreen.classList.remove('hidden');
-    });
+    document.getElementById('google-signin-btn').addEventListener('click', handleGoogleSignIn);
+    document.getElementById('setup-form').addEventListener('submit', handleSetupSubmit);
+    document.getElementById('setup-role').addEventListener('change', handleRoleChange);
     document.getElementById('logout-btn').addEventListener('click', handleLogout);
     document.getElementById('faculty-logout-btn').addEventListener('click', handleLogout);
     document.getElementById('show-summer').addEventListener('change', toggleSummer);
     document.querySelector('.close-btn').addEventListener('click', closeModal);
     document.getElementById('course-search').addEventListener('input', handleCourseSearch);
-    
-    // Faculty checkbox toggle
-    document.getElementById('reg-faculty').addEventListener('change', (e) => {
-        const studentFields = document.getElementById('student-fields');
-        const facultyFields = document.getElementById('faculty-fields');
-        const startYear = document.getElementById('reg-start-year');
-        const major = document.getElementById('reg-major');
-        
-        if (e.target.checked) {
-            studentFields.classList.add('hidden');
-            facultyFields.classList.remove('hidden');
-            startYear.removeAttribute('required');
-            major.removeAttribute('required');
-        } else {
-            studentFields.classList.remove('hidden');
-            facultyFields.classList.add('hidden');
-            startYear.setAttribute('required', '');
-            major.setAttribute('required', '');
-        }
-    });
     
     // Faculty view tabs
     document.getElementById('tab-aggregate').addEventListener('click', () => switchFacultyTab('aggregate'));
@@ -76,8 +79,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Close student modal
     document.getElementById('close-student-modal').addEventListener('click', () => {
         document.getElementById('student-modal').classList.add('hidden');
-        editingStudentUsername = null;
-        renderStudentList(); // Refresh the list to show updated course counts
+        editingStudentId = null;
+        renderStudentList();
     });
     
     // Close modal on outside click
@@ -87,105 +90,127 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('student-modal').addEventListener('click', (e) => {
         if (e.target.id === 'student-modal') {
             document.getElementById('student-modal').classList.add('hidden');
-            editingStudentUsername = null;
+            editingStudentId = null;
             renderStudentList();
         }
     });
 });
 
-// Authentication
-function handleLogin(e) {
-    e.preventDefault();
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    
-    // Get users from localStorage
-    const users = JSON.parse(localStorage.getItem('plu_users') || '{}');
-    
-    if (users[username] && users[username].password === password) {
-        currentUser = users[username];
-        localStorage.setItem('plu_current_user', JSON.stringify(currentUser));
-        
-        if (currentUser.isFaculty) {
-            showFacultyScreen();
-        } else {
-            loadSchedule();
-            showScheduleScreen();
-        }
-    } else {
-        alert('Invalid username or password');
-    }
-}
+// ==================== AUTHENTICATION ====================
 
-function handleRegister(e) {
-    e.preventDefault();
-    const username = document.getElementById('reg-username').value;
-    const password = document.getElementById('reg-password').value;
-    const name = document.getElementById('reg-name').value;
-    const isFaculty = document.getElementById('reg-faculty').checked;
+async function handleGoogleSignIn() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    // Hint to use PLU accounts
+    provider.setCustomParameters({
+        hd: window.ALLOWED_DOMAIN
+    });
     
-    // Get existing users
-    const users = JSON.parse(localStorage.getItem('plu_users') || '{}');
-    
-    if (users[username]) {
-        alert('Username already exists');
-        return;
-    }
-    
-    // Create new user
-    let newUser;
-    if (isFaculty) {
-        const department = document.getElementById('reg-department').value;
-        newUser = {
-            username,
-            password,
-            name,
-            department,
-            isFaculty: true
-        };
-    } else {
-        const startYear = parseInt(document.getElementById('reg-start-year').value);
-        const major = document.getElementById('reg-major').value;
-        newUser = {
-            username,
-            password,
-            name,
-            startYear,
-            major,
-            isFaculty: false
-        };
-        
-        // Initialize empty schedule for students only
-        const schedules = JSON.parse(localStorage.getItem('plu_schedules') || '{}');
-        schedules[username] = createEmptySchedule(startYear);
-        localStorage.setItem('plu_schedules', JSON.stringify(schedules));
-    }
-    
-    users[username] = newUser;
-    localStorage.setItem('plu_users', JSON.stringify(users));
-    
-    // Auto-login
-    currentUser = newUser;
-    localStorage.setItem('plu_current_user', JSON.stringify(currentUser));
-    
-    if (isFaculty) {
-        showFacultyScreen();
-    } else {
-        loadSchedule();
-        showScheduleScreen();
+    try {
+        await auth.signInWithPopup(provider);
+    } catch (error) {
+        console.error('Sign in error:', error);
+        alert('Sign in failed: ' + error.message);
     }
 }
 
 function handleLogout() {
-    currentUser = null;
-    localStorage.removeItem('plu_current_user');
-    scheduleScreen.classList.add('hidden');
-    facultyScreen.classList.add('hidden');
-    loginScreen.classList.remove('hidden');
-    document.getElementById('login-form').reset();
+    auth.signOut();
 }
 
-// Schedule Management
+function showLoginScreen() {
+    loginScreen.classList.remove('hidden');
+    setupScreen.classList.add('hidden');
+    scheduleScreen.classList.add('hidden');
+    facultyScreen.classList.add('hidden');
+}
+
+function showSetupScreen(user) {
+    loginScreen.classList.add('hidden');
+    setupScreen.classList.remove('hidden');
+    scheduleScreen.classList.add('hidden');
+    facultyScreen.classList.add('hidden');
+    
+    document.getElementById('setup-name').value = user.displayName || '';
+    document.getElementById('setup-email').value = user.email;
+}
+
+function handleRoleChange(e) {
+    const studentFields = document.getElementById('student-setup-fields');
+    const facultyFields = document.getElementById('faculty-setup-fields');
+    
+    if (e.target.value === 'student') {
+        studentFields.classList.remove('hidden');
+        facultyFields.classList.add('hidden');
+    } else if (e.target.value === 'faculty') {
+        studentFields.classList.add('hidden');
+        facultyFields.classList.remove('hidden');
+    } else {
+        studentFields.classList.add('hidden');
+        facultyFields.classList.add('hidden');
+    }
+}
+
+async function handleSetupSubmit(e) {
+    e.preventDefault();
+    
+    const role = document.getElementById('setup-role').value;
+    
+    if (!role) {
+        alert('Please select a role');
+        return;
+    }
+    
+    const profileData = {
+        uid: currentUser.uid,
+        email: currentUser.email,
+        name: currentUser.displayName || document.getElementById('setup-name').value,
+        role: role,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
+    if (role === 'student') {
+        const startYear = document.getElementById('setup-start-year').value;
+        const major = document.getElementById('setup-major').value;
+        
+        if (!startYear || !major) {
+            alert('Please fill in all student fields');
+            return;
+        }
+        
+        profileData.startYear = parseInt(startYear);
+        profileData.major = major;
+        
+        // Create empty schedule
+        const schedule = createEmptySchedule(profileData.startYear);
+        await db.collection('schedules').doc(currentUser.uid).set({
+            userId: currentUser.uid,
+            schedule: schedule,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    } else {
+        profileData.department = document.getElementById('setup-department').value || '';
+    }
+    
+    // Save profile
+    await db.collection('users').doc(currentUser.uid).set(profileData);
+    
+    userProfile = profileData;
+    
+    if (role === 'faculty') {
+        showFacultyScreen();
+    } else {
+        await loadSchedule();
+        showScheduleScreen();
+    }
+}
+
+// ==================== DATABASE FUNCTIONS ====================
+
+async function getUserProfile(uid) {
+    const doc = await db.collection('users').doc(uid).get();
+    return doc.exists ? doc.data() : null;
+}
+
 function createEmptySchedule(startYear) {
     const schedule = {};
     for (let i = 0; i < 5; i++) {
@@ -201,29 +226,36 @@ function createEmptySchedule(startYear) {
     return schedule;
 }
 
-function loadSchedule() {
-    const schedules = JSON.parse(localStorage.getItem('plu_schedules') || '{}');
-    scheduleData = schedules[currentUser.username] || createEmptySchedule(currentUser.startYear);
+async function loadSchedule() {
+    const doc = await db.collection('schedules').doc(currentUser.uid).get();
+    if (doc.exists) {
+        scheduleData = doc.data().schedule;
+    } else {
+        scheduleData = createEmptySchedule(userProfile.startYear);
+    }
 }
 
-function saveSchedule() {
-    const schedules = JSON.parse(localStorage.getItem('plu_schedules') || '{}');
-    schedules[currentUser.username] = scheduleData;
-    localStorage.setItem('plu_schedules', JSON.stringify(schedules));
+async function saveSchedule() {
+    const targetId = editingStudentId || currentUser.uid;
+    await db.collection('schedules').doc(targetId).update({
+        schedule: scheduleData,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
     updateCreditSummary();
 }
 
-// UI Rendering
+// ==================== STUDENT UI ====================
+
 function showScheduleScreen() {
     loginScreen.classList.add('hidden');
-    registerScreen.classList.add('hidden');
+    setupScreen.classList.add('hidden');
     scheduleScreen.classList.remove('hidden');
+    facultyScreen.classList.add('hidden');
     
-    // Update header
-    document.getElementById('user-display').textContent = currentUser.name;
-    document.getElementById('student-name').textContent = currentUser.name;
-    document.getElementById('student-major').textContent = currentUser.major + ' Major';
-    document.getElementById('grad-year').textContent = currentUser.startYear + 4;
+    document.getElementById('user-display').textContent = userProfile.name;
+    document.getElementById('student-name').textContent = userProfile.name;
+    document.getElementById('student-major').textContent = userProfile.major + ' Major';
+    document.getElementById('grad-year').textContent = userProfile.startYear + 4;
     
     renderSchedule();
 }
@@ -233,6 +265,7 @@ function renderSchedule() {
     container.innerHTML = '';
     
     const years = Object.keys(scheduleData).sort();
+    const startYear = userProfile.startYear || parseInt(years[0]);
     
     years.forEach(year => {
         const yearData = scheduleData[year];
@@ -241,7 +274,7 @@ function renderSchedule() {
         
         const nextYear = parseInt(year) + 1;
         yearBlock.innerHTML = `
-            <div class="year-header">Year ${parseInt(year) - currentUser.startYear + 1} (${year}-${String(nextYear).slice(2)})</div>
+            <div class="year-header">Year ${parseInt(year) - startYear + 1} (${year}-${String(nextYear).slice(2)})</div>
             <div class="terms-container">
                 ${renderTerm(year, 'fall', 'Fall', yearData.fall)}
                 ${renderTerm(year, 'jterm', 'J-Term', yearData.jterm)}
@@ -319,7 +352,6 @@ function updateCreditSummary() {
                 const course = getCourse(code);
                 if (course) {
                     totalCredits += course.credits;
-                    // Check if 300+ level
                     const courseNum = parseInt(code.split(' ')[1]);
                     if (courseNum >= 300) {
                         upperCredits += course.credits;
@@ -333,7 +365,8 @@ function updateCreditSummary() {
     document.getElementById('upper-credits').textContent = upperCredits;
 }
 
-// Course Modal
+// ==================== COURSE MODAL ====================
+
 function openCourseModal(year, term) {
     selectedTerm = { year, term };
     courseModal.classList.remove('hidden');
@@ -371,7 +404,6 @@ function handleCourseSearch(e) {
         </div>
     `).join('');
     
-    // Add click listeners
     resultsDiv.querySelectorAll('.course-option').forEach(option => {
         option.addEventListener('click', () => {
             addCourse(option.dataset.code);
@@ -379,18 +411,16 @@ function handleCourseSearch(e) {
     });
 }
 
-function addCourse(code) {
+async function addCourse(code) {
     if (!selectedTerm) return;
     
     const { year, term } = selectedTerm;
     
-    // Check if course already exists in this term
     if (scheduleData[year][term].includes(code)) {
         alert('Course already added to this term');
         return;
     }
     
-    // Check prerequisites (simple version - just warn)
     const course = getCourse(code);
     if (course && course.prereqs.length > 0) {
         const allPriorCourses = getAllPriorCourses(year, term);
@@ -402,30 +432,29 @@ function addCourse(code) {
     }
     
     scheduleData[year][term].push(code);
+    await saveSchedule();
+    closeModal();
     
-    // Save to the appropriate user's schedule
-    if (currentUser.isFaculty && editingStudentUsername) {
-        // Faculty editing a student's schedule
-        const schedules = JSON.parse(localStorage.getItem('plu_schedules') || '{}');
-        schedules[editingStudentUsername] = scheduleData;
-        localStorage.setItem('plu_schedules', JSON.stringify(schedules));
-        closeModal();
-        showStudentSchedule(editingStudentUsername);
+    if (editingStudentId) {
+        showStudentSchedule(editingStudentId);
         renderAggregateView();
     } else {
-        // Student editing their own schedule
-        saveSchedule();
-        closeModal();
         renderSchedule();
     }
 }
 
-function removeCourse(year, term, code) {
+async function removeCourse(year, term, code) {
     const index = scheduleData[year][term].indexOf(code);
     if (index > -1) {
         scheduleData[year][term].splice(index, 1);
-        saveSchedule();
-        renderSchedule();
+        await saveSchedule();
+        
+        if (editingStudentId) {
+            showStudentSchedule(editingStudentId);
+            renderAggregateView();
+        } else {
+            renderSchedule();
+        }
     }
 }
 
@@ -436,12 +465,10 @@ function getAllPriorCourses(currentYear, currentTerm) {
     
     Object.keys(scheduleData).sort().forEach(year => {
         if (year < currentYear) {
-            // All terms from prior years
             Object.values(scheduleData[year]).forEach(termCourses => {
                 courses.push(...termCourses);
             });
         } else if (year === currentYear) {
-            // Only terms before current term in same year
             termOrder.forEach((term, index) => {
                 if (index < currentTermIndex) {
                     courses.push(...scheduleData[year][term]);
@@ -453,7 +480,6 @@ function getAllPriorCourses(currentYear, currentTerm) {
     return courses;
 }
 
-// Toggle Summer Sessions
 function toggleSummer() {
     const show = document.getElementById('show-summer').checked;
     document.querySelectorAll('.year-block').forEach(block => {
@@ -467,16 +493,16 @@ function toggleSummer() {
 
 // ==================== FACULTY VIEW ====================
 
-function showFacultyScreen() {
+async function showFacultyScreen() {
     loginScreen.classList.add('hidden');
-    registerScreen.classList.add('hidden');
+    setupScreen.classList.add('hidden');
     scheduleScreen.classList.add('hidden');
     facultyScreen.classList.remove('hidden');
     
-    document.getElementById('faculty-display').textContent = currentUser.name;
+    document.getElementById('faculty-display').textContent = userProfile.name;
     
-    renderAggregateView();
-    renderStudentList();
+    await renderAggregateView();
+    await renderStudentList();
 }
 
 function switchFacultyTab(tab) {
@@ -498,25 +524,27 @@ function switchFacultyTab(tab) {
     }
 }
 
-function renderAggregateView() {
-    const schedules = JSON.parse(localStorage.getItem('plu_schedules') || '{}');
-    const users = JSON.parse(localStorage.getItem('plu_users') || '{}');
+async function renderAggregateView() {
     const filterDept = document.getElementById('filter-dept').value;
     
-    // Collect all terms across all schedules
+    // Get all schedules
+    const schedulesSnapshot = await db.collection('schedules').get();
+    
     const allTerms = new Set();
     const courseDemand = {};
     
-    Object.entries(schedules).forEach(([username, schedule]) => {
+    schedulesSnapshot.forEach(doc => {
+        const data = doc.data();
+        const schedule = data.schedule;
+        
         Object.entries(schedule).forEach(([year, terms]) => {
             Object.entries(terms).forEach(([term, courses]) => {
-                if (term === 'summer1' || term === 'summer2') return; // Skip summer for now
+                if (term === 'summer1' || term === 'summer2') return;
                 
                 const termKey = `${term} ${year}`;
                 allTerms.add(termKey);
                 
                 courses.forEach(code => {
-                    // Apply department filter
                     if (filterDept && !code.startsWith(filterDept)) return;
                     
                     if (!courseDemand[code]) {
@@ -531,7 +559,6 @@ function renderAggregateView() {
         });
     });
     
-    // Sort terms chronologically
     const sortedTerms = Array.from(allTerms).sort((a, b) => {
         const [termA, yearA] = a.split(' ');
         const [termB, yearB] = b.split(' ');
@@ -541,7 +568,6 @@ function renderAggregateView() {
         return termOrder[termA] - termOrder[termB];
     });
     
-    // Render table header
     const headerRow = document.getElementById('aggregate-header');
     headerRow.innerHTML = `
         <th>Course</th>
@@ -551,7 +577,6 @@ function renderAggregateView() {
         }).join('')}
     `;
     
-    // Render table body
     const tbody = document.getElementById('aggregate-body');
     const sortedCourses = Object.keys(courseDemand).sort();
     
@@ -574,28 +599,37 @@ function renderAggregateView() {
     }).join('');
 }
 
-function renderStudentList() {
-    const users = JSON.parse(localStorage.getItem('plu_users') || '{}');
-    const schedules = JSON.parse(localStorage.getItem('plu_schedules') || '{}');
-    
+async function renderStudentList() {
     const studentList = document.getElementById('student-list');
     
-    // Get all students (non-faculty users)
-    const students = Object.values(users).filter(u => !u.isFaculty);
+    // Get all students
+    const usersSnapshot = await db.collection('users').where('role', '==', 'student').get();
     
-    if (students.length === 0) {
+    if (usersSnapshot.empty) {
         studentList.innerHTML = '<p style="color: #666;">No students registered yet</p>';
         return;
     }
     
+    // Get all schedules for course count
+    const schedulesSnapshot = await db.collection('schedules').get();
+    const schedules = {};
+    schedulesSnapshot.forEach(doc => {
+        schedules[doc.id] = doc.data().schedule;
+    });
+    
+    const students = [];
+    usersSnapshot.forEach(doc => {
+        students.push({ id: doc.id, ...doc.data() });
+    });
+    
     studentList.innerHTML = students.map(student => {
-        const schedule = schedules[student.username];
+        const schedule = schedules[student.uid];
         const totalCourses = schedule ? Object.values(schedule).reduce((sum, terms) => 
             sum + Object.values(terms).reduce((tSum, courses) => tSum + courses.length, 0), 0
         ) : 0;
         
         return `
-            <div class="student-card" data-username="${student.username}">
+            <div class="student-card" data-uid="${student.uid}">
                 <div class="student-card-name">${student.name}</div>
                 <div class="student-card-info">
                     ${student.major} • Class of ${student.startYear + 4} • ${totalCourses} courses planned
@@ -604,25 +638,23 @@ function renderStudentList() {
         `;
     }).join('');
     
-    // Add click listeners
     studentList.querySelectorAll('.student-card').forEach(card => {
         card.addEventListener('click', () => {
-            showStudentSchedule(card.dataset.username);
+            showStudentSchedule(card.dataset.uid);
         });
     });
 }
 
-function showStudentSchedule(username) {
-    const users = JSON.parse(localStorage.getItem('plu_users') || '{}');
-    const schedules = JSON.parse(localStorage.getItem('plu_schedules') || '{}');
+async function showStudentSchedule(uid) {
+    const userDoc = await db.collection('users').doc(uid).get();
+    const scheduleDoc = await db.collection('schedules').doc(uid).get();
     
-    const student = users[username];
-    const schedule = schedules[username];
+    if (!userDoc.exists || !scheduleDoc.exists) return;
     
-    if (!student || !schedule) return;
+    const student = userDoc.data();
+    const schedule = scheduleDoc.data().schedule;
     
-    // Set the editing context
-    editingStudentUsername = username;
+    editingStudentId = uid;
     scheduleData = schedule;
     
     document.getElementById('student-modal-title').textContent = `${student.name}'s Schedule`;
@@ -630,9 +662,7 @@ function showStudentSchedule(username) {
     const container = document.getElementById('student-schedule-view');
     container.innerHTML = '';
     
-    // Render the full editable schedule grid (same as student view)
     const scheduleContainer = document.createElement('div');
-    scheduleContainer.id = 'faculty-schedule-container';
     scheduleContainer.className = 'faculty-schedule-grid';
     
     const years = Object.keys(schedule).sort();
@@ -646,9 +676,9 @@ function showStudentSchedule(username) {
         yearBlock.innerHTML = `
             <div class="year-header">Year ${parseInt(year) - student.startYear + 1} (${year}-${String(nextYear).slice(2)})</div>
             <div class="terms-container">
-                ${renderTermForFaculty(year, 'fall', 'Fall', yearData.fall, username)}
-                ${renderTermForFaculty(year, 'jterm', 'J-Term', yearData.jterm, username)}
-                ${renderTermForFaculty(year, 'spring', 'Spring', yearData.spring, username)}
+                ${renderTerm(year, 'fall', 'Fall', yearData.fall)}
+                ${renderTerm(year, 'jterm', 'J-Term', yearData.jterm)}
+                ${renderTerm(year, 'spring', 'Spring', yearData.spring)}
             </div>
         `;
         
@@ -657,144 +687,40 @@ function showStudentSchedule(username) {
     
     container.appendChild(scheduleContainer);
     
-    // Add credit summary
+    // Credit summary
     const creditSummary = document.createElement('div');
     creditSummary.className = 'faculty-credit-summary';
-    creditSummary.innerHTML = `
-        <div class="summary-item">
-            <span class="label">Total Credits:</span>
-            <span id="faculty-total-credits">0</span>
-        </div>
-        <div class="summary-item">
-            <span class="label">300+ Level:</span>
-            <span id="faculty-upper-credits">0</span>
-        </div>
-    `;
-    container.appendChild(creditSummary);
-    
-    // Add event listeners for add buttons
-    container.querySelectorAll('.add-course-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const year = btn.dataset.year;
-            const term = btn.dataset.term;
-            openCourseModal(year, term);
-        });
-    });
-    
-    // Add event listeners for remove buttons
-    container.querySelectorAll('.remove-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const year = btn.dataset.year;
-            const term = btn.dataset.term;
-            const code = btn.dataset.code;
-            removeCourseForStudent(username, year, term, code);
-        });
-    });
-    
-    updateFacultyCreditSummary();
-    
-    document.getElementById('student-modal').classList.remove('hidden');
-}
-
-function renderTermForFaculty(year, termKey, termName, courses, username) {
-    const termCredits = courses.reduce((sum, code) => {
-        const course = getCourse(code);
-        return sum + (course ? course.credits : 0);
-    }, 0);
-    
-    const maxCourses = termKey === 'jterm' ? 3 : 7;
-    
-    return `
-        <div class="term">
-            <div class="term-header ${termKey}">${termName} ${year}</div>
-            <div class="courses-list">
-                ${courses.map(code => {
-                    const course = getCourse(code);
-                    return `
-                        <div class="course-item">
-                            <div>
-                                <span class="course-code">${code}</span>
-                                <span class="course-credits">(${course ? course.credits : '?'} cr)</span>
-                            </div>
-                            <button class="remove-btn" data-year="${year}" data-term="${termKey}" data-code="${code}">&times;</button>
-                        </div>
-                    `;
-                }).join('')}
-                ${courses.length < maxCourses ? `
-                    <button class="add-course-btn" data-year="${year}" data-term="${termKey}">+ Add Course</button>
-                ` : ''}
-            </div>
-            <div class="term-credits">${termCredits}</div>
-        </div>
-    `;
-}
-
-function removeCourseForStudent(username, year, term, code) {
-    const schedules = JSON.parse(localStorage.getItem('plu_schedules') || '{}');
-    const schedule = schedules[username];
-    
-    if (!schedule) return;
-    
-    const index = schedule[year][term].indexOf(code);
-    if (index > -1) {
-        schedule[year][term].splice(index, 1);
-        schedules[username] = schedule;
-        localStorage.setItem('plu_schedules', JSON.stringify(schedules));
-        
-        // Update the current view
-        scheduleData = schedule;
-        
-        // Re-render the student schedule
-        showStudentSchedule(username);
-        
-        // Update aggregate view
-        renderAggregateView();
-    }
-}
-
-function updateFacultyCreditSummary() {
-    let totalCredits = 0;
-    let upperCredits = 0;
-    
-    Object.values(scheduleData).forEach(yearData => {
+    let totalCredits = 0, upperCredits = 0;
+    Object.values(schedule).forEach(yearData => {
         Object.values(yearData).forEach(termCourses => {
             termCourses.forEach(code => {
                 const course = getCourse(code);
                 if (course) {
                     totalCredits += course.credits;
                     const courseNum = parseInt(code.split(' ')[1]);
-                    if (courseNum >= 300) {
-                        upperCredits += course.credits;
-                    }
+                    if (courseNum >= 300) upperCredits += course.credits;
                 }
             });
         });
     });
-    
-    const totalEl = document.getElementById('faculty-total-credits');
-    const upperEl = document.getElementById('faculty-upper-credits');
-    if (totalEl) totalEl.textContent = totalCredits;
-    if (upperEl) upperEl.textContent = upperCredits;
-}
-
-function renderStudentTerm(termName, courses) {
-    const termColors = {
-        'Fall': '#f6e05e',
-        'J-Term': '#68d391',
-        'Spring': '#63b3ed'
-    };
-    
-    return `
-        <div style="flex: 1; min-width: 120px;">
-            <div style="background: ${termColors[termName]}; padding: 8px; text-align: center; font-weight: 600; border-radius: 4px 4px 0 0;">
-                ${termName}
-            </div>
-            <div style="background: #f8f8f8; border: 1px solid #ddd; border-top: none; padding: 10px; min-height: 100px; border-radius: 0 0 4px 4px;">
-                ${courses.length > 0 
-                    ? courses.map(code => `<div style="margin-bottom: 5px; font-size: 14px;">${code}</div>`).join('')
-                    : '<div style="color: #999; font-size: 13px;">No courses</div>'
-                }
-            </div>
-        </div>
+    creditSummary.innerHTML = `
+        <div class="summary-item"><span class="label">Total Credits:</span> <span>${totalCredits}</span></div>
+        <div class="summary-item"><span class="label">300+ Level:</span> <span>${upperCredits}</span></div>
     `;
+    container.appendChild(creditSummary);
+    
+    // Re-attach event listeners
+    container.querySelectorAll('.add-course-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            openCourseModal(btn.dataset.year, btn.dataset.term);
+        });
+    });
+    
+    container.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            removeCourse(btn.dataset.year, btn.dataset.term, btn.dataset.code);
+        });
+    });
+    
+    document.getElementById('student-modal').classList.remove('hidden');
 }
