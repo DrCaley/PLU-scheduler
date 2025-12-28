@@ -27,30 +27,39 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Auth state listener
     auth.onAuthStateChanged(async (user) => {
+        console.log('Auth state changed:', user ? user.email : 'no user');
         if (user) {
             currentUser = user;
             
-            // Check email domain
+            // Check email domain (skip if ALLOWED_DOMAIN is null for testing)
             const emailDomain = user.email.split('@')[1];
-            if (emailDomain !== window.ALLOWED_DOMAIN) {
+            if (window.ALLOWED_DOMAIN && emailDomain !== window.ALLOWED_DOMAIN) {
                 alert(`Access restricted to @${window.ALLOWED_DOMAIN} email addresses.`);
                 await auth.signOut();
                 return;
             }
             
-            // Check if user has a profile
-            const profile = await getUserProfile(user.uid);
-            if (profile) {
-                userProfile = profile;
-                if (userProfile.role === 'faculty') {
-                    showFacultyScreen();
+            try {
+                // Check if user has a profile
+                console.log('Checking for user profile...');
+                const profile = await getUserProfile(user.uid);
+                console.log('Profile result:', profile);
+                if (profile) {
+                    userProfile = profile;
+                    if (userProfile.role === 'faculty') {
+                        showFacultyScreen();
+                    } else {
+                        await loadSchedule();
+                        showScheduleScreen();
+                    }
                 } else {
-                    await loadSchedule();
-                    showScheduleScreen();
+                    // New user - show setup screen
+                    console.log('New user, showing setup screen');
+                    showSetupScreen(user);
                 }
-            } else {
-                // New user - show setup screen
-                showSetupScreen(user);
+            } catch (error) {
+                console.error('Error during auth flow:', error);
+                alert('Error: ' + error.message);
             }
         } else {
             currentUser = null;
@@ -100,13 +109,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function handleGoogleSignIn() {
     const provider = new firebase.auth.GoogleAuthProvider();
-    // Hint to use PLU accounts
-    provider.setCustomParameters({
-        hd: window.ALLOWED_DOMAIN
-    });
+    // Only hint to use PLU accounts if domain restriction is enabled
+    if (window.ALLOWED_DOMAIN) {
+        provider.setCustomParameters({
+            hd: window.ALLOWED_DOMAIN
+        });
+    }
     
     try {
+        console.log('Starting Google sign-in...');
         await auth.signInWithPopup(provider);
+        console.log('Sign-in popup completed');
     } catch (error) {
         console.error('Sign in error:', error);
         alert('Sign in failed: ' + error.message);

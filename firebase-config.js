@@ -1,18 +1,16 @@
 // Firebase configuration
-// Replace these values with your Firebase project config from:
-// Firebase Console > Project Settings > Your apps > Config
-
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyCaSjlZOPDGTDhlfjOnmmMW6QAmi3ru0cQ",
+    authDomain: "plu-scheduler.firebaseapp.com",
+    projectId: "plu-scheduler",
+    storageBucket: "plu-scheduler.firebasestorage.app",
+    messagingSenderId: "786168405720",
+    appId: "1:786168405720:web:3aa9e4b8a47f4fa56cc1ad"
 };
 
 // Allowed email domain (PLU)
-const ALLOWED_DOMAIN = "plu.edu";
+// TODO: Change back to "plu.edu" for production
+const ALLOWED_DOMAIN = null; // null = allow any domain for testing
 
 // Export for use in app
 window.firebaseConfig = firebaseConfig;
