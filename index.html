@@ -28,26 +28,31 @@
                 <input type="text" id="reg-username" placeholder="Username" required>
                 <input type="password" id="reg-password" placeholder="Password" required>
                 <input type="text" id="reg-name" placeholder="Full Name" required>
-                <select id="reg-start-year" required>
-                    <option value="">Starting Year</option>
-                    <option value="2024">2024</option>
-                    <option value="2025">2025</option>
-                    <option value="2026">2026</option>
-                </select>
-                <select id="reg-major" required>
-                    <option value="">Major</option>
-                    <option value="CSCI">Computer Science</option>
-                    <option value="MATH">Mathematics</option>
-                    <option value="BIOL">Biology</option>
-                    <option value="CHEM">Chemistry</option>
-                    <option value="PHYS">Physics</option>
-                    <option value="ENGL">English</option>
-                    <option value="HIST">History</option>
-                    <option value="OTHER">Other</option>
-                </select>
                 <label class="checkbox-label">
                     <input type="checkbox" id="reg-faculty"> I am faculty/advisor
                 </label>
+                <div id="student-fields">
+                    <select id="reg-start-year" required>
+                        <option value="">Starting Year</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                    </select>
+                    <select id="reg-major" required>
+                        <option value="">Major</option>
+                        <option value="CSCI">Computer Science</option>
+                        <option value="MATH">Mathematics</option>
+                        <option value="BIOL">Biology</option>
+                        <option value="CHEM">Chemistry</option>
+                        <option value="PHYS">Physics</option>
+                        <option value="ENGL">English</option>
+                        <option value="HIST">History</option>
+                        <option value="OTHER">Other</option>
+                    </select>
+                </div>
+                <div id="faculty-fields" class="hidden">
+                    <input type="text" id="reg-department" placeholder="Department">
+                </div>
                 <button type="submit">Create Account</button>
                 <p class="register-link"><a href="#" id="show-login">Back to Login</a></p>
             </form>
@@ -89,6 +94,65 @@
             <div class="summary-item">
                 <span class="label">300+ Level:</span>
                 <span id="upper-credits">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Faculty Aggregate View -->
+    <div id="faculty-screen" class="screen hidden">
+        <header>
+            <h1>PLU Schedule Planner - Faculty View</h1>
+            <div class="header-right">
+                <span id="faculty-display"></span>
+                <button id="faculty-logout-btn">Logout</button>
+            </div>
+        </header>
+
+        <div class="toolbar">
+            <div class="view-tabs">
+                <button class="tab-btn active" id="tab-aggregate">Course Demand</button>
+                <button class="tab-btn" id="tab-students">Student Schedules</button>
+            </div>
+            <div class="toolbar-actions">
+                <select id="filter-dept">
+                    <option value="">All Departments</option>
+                    <option value="CSCI">Computer Science</option>
+                    <option value="MATH">Mathematics</option>
+                    <option value="BIOL">Biology</option>
+                    <option value="CHEM">Chemistry</option>
+                    <option value="PHYS">Physics</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Aggregate View -->
+        <div id="aggregate-view" class="faculty-content">
+            <h2>Course Demand Forecast</h2>
+            <p class="subtitle">Number of students planning to take each course by term</p>
+            <div id="aggregate-table-container">
+                <table id="aggregate-table">
+                    <thead>
+                        <tr id="aggregate-header"></tr>
+                    </thead>
+                    <tbody id="aggregate-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Student List View -->
+        <div id="students-view" class="faculty-content hidden">
+            <h2>Student Schedules</h2>
+            <div id="student-list"></div>
+        </div>
+
+        <!-- Student Detail Modal -->
+        <div id="student-modal" class="modal hidden">
+            <div class="modal-content modal-large">
+                <div class="modal-header">
+                    <h2 id="student-modal-title">Student Schedule</h2>
+                    <button class="close-btn" id="close-student-modal">&times;</button>
+                </div>
+                <div class="modal-body" id="student-schedule-view"></div>
             </div>
         </div>
     </div>

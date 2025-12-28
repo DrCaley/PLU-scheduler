@@ -304,6 +304,157 @@ header h1 {
     font-weight: 600;
 }
 
+/* Faculty View */
+.view-tabs {
+    display: flex;
+    gap: 10px;
+}
+
+.tab-btn {
+    padding: 8px 20px;
+    background: transparent;
+    border: 2px solid #1a365d;
+    border-radius: 4px;
+    color: #1a365d;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.tab-btn.active {
+    background: #1a365d;
+    color: white;
+}
+
+.tab-btn:hover:not(.active) {
+    background: rgba(26, 54, 93, 0.1);
+}
+
+.faculty-content {
+    padding: 20px 30px;
+}
+
+.faculty-content h2 {
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.faculty-content .subtitle {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+#aggregate-table-container {
+    overflow-x: auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+#aggregate-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+#aggregate-table th,
+#aggregate-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+#aggregate-table th {
+    background: #f5f5f5;
+    font-weight: 600;
+    color: #333;
+    position: sticky;
+    top: 0;
+}
+
+#aggregate-table th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+}
+
+#aggregate-table td:first-child {
+    font-weight: 600;
+    color: #1a365d;
+    position: sticky;
+    left: 0;
+    background: white;
+}
+
+#aggregate-table tr:hover td {
+    background: #f8f8f8;
+}
+
+#aggregate-table td:first-child:hover,
+#aggregate-table tr:hover td:first-child {
+    background: #f0f0f0;
+}
+
+.demand-high {
+    background: #c6f6d5 !important;
+    font-weight: 600;
+}
+
+.demand-medium {
+    background: #fefcbf !important;
+}
+
+.demand-low {
+    background: #fff;
+}
+
+/* Student List */
+#student-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
+}
+
+.student-card {
+    background: white;
+    border-radius: 8px;
+    padding: 15px 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+}
+
+.student-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.student-card-name {
+    font-weight: 600;
+    color: #1a365d;
+    font-size: 16px;
+}
+
+.student-card-info {
+    color: #666;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.modal-large {
+    max-width: 900px;
+    max-height: 90vh;
+}
+
+.modal-large .modal-body {
+    overflow-y: auto;
+}
+
+/* Faculty fields spacing */
+#student-fields, #faculty-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
 /* Modal */
 .modal {
     position: fixed;
