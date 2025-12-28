@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLU Schedule Planner</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen">
+        <div class="login-box">
+            <h1>PLU Schedule Planner</h1>
+            <form id="login-form">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+                <p class="register-link">Don't have an account? <a href="#" id="show-register">Register</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Screen -->
+    <div id="register-screen" class="screen hidden">
+        <div class="login-box">
+            <h1>Create Account</h1>
+            <form id="register-form">
+                <input type="text" id="reg-username" placeholder="Username" required>
+                <input type="password" id="reg-password" placeholder="Password" required>
+                <input type="text" id="reg-name" placeholder="Full Name" required>
+                <select id="reg-start-year" required>
+                    <option value="">Starting Year</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                </select>
+                <select id="reg-major" required>
+                    <option value="">Major</option>
+                    <option value="CSCI">Computer Science</option>
+                    <option value="MATH">Mathematics</option>
+                    <option value="BIOL">Biology</option>
+                    <option value="CHEM">Chemistry</option>
+                    <option value="PHYS">Physics</option>
+                    <option value="ENGL">English</option>
+                    <option value="HIST">History</option>
+                    <option value="OTHER">Other</option>
+                </select>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="reg-faculty"> I am faculty/advisor
+                </label>
+                <button type="submit">Create Account</button>
+                <p class="register-link"><a href="#" id="show-login">Back to Login</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Schedule Screen -->
+    <div id="schedule-screen" class="screen hidden">
+        <header>
+            <h1>PLU Schedule Planner</h1>
+            <div class="header-right">
+                <span id="user-display"></span>
+                <button id="logout-btn">Logout</button>
+            </div>
+        </header>
+
+        <div class="toolbar">
+            <div class="student-info">
+                <span id="student-name"></span>
+                <span id="student-major"></span>
+                <span>Expected Graduation: <span id="grad-year"></span></span>
+            </div>
+            <div class="toolbar-actions">
+                <label>
+                    <input type="checkbox" id="show-summer"> Show Summer Sessions
+                </label>
+            </div>
+        </div>
+
+        <div id="schedule-container">
+            <!-- Years will be generated here -->
+        </div>
+
+        <div id="credit-summary">
+            <div class="summary-item">
+                <span class="label">Total Credits:</span>
+                <span id="total-credits">0</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">300+ Level:</span>
+                <span id="upper-credits">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Selection Modal -->
+    <div id="course-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Course</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="course-search" placeholder="Search courses (e.g., CSCI 144)">
+                <div id="course-results"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="courses.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

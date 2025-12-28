@@ -1,0 +1,412 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f5f5f5;
+    min-height: 100vh;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Login/Register Screens */
+.screen {
+    min-height: 100vh;
+}
+
+#login-screen, #register-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1a365d 0%, #2d4a7c 100%);
+}
+
+.login-box {
+    background: white;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-box h1 {
+    color: #1a365d;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.login-box form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.login-box input, .login-box select {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.login-box input:focus, .login-box select:focus {
+    outline: none;
+    border-color: #2d4a7c;
+}
+
+.login-box button {
+    padding: 12px;
+    background: #c4a000;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.login-box button:hover {
+    background: #a08500;
+}
+
+.register-link {
+    text-align: center;
+    color: #666;
+    margin-top: 10px;
+}
+
+.register-link a {
+    color: #2d4a7c;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+/* Header */
+header {
+    background: #1a365d;
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h1 {
+    font-size: 24px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+#logout-btn {
+    padding: 8px 16px;
+    background: transparent;
+    color: white;
+    border: 1px solid white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#logout-btn:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+/* Toolbar */
+.toolbar {
+    background: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.student-info {
+    display: flex;
+    gap: 30px;
+    color: #333;
+}
+
+.student-info span {
+    font-weight: 500;
+}
+
+.toolbar-actions label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+/* Schedule Container */
+#schedule-container {
+    padding: 20px 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+/* Year Block */
+.year-block {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+    min-width: 450px;
+    flex: 1;
+}
+
+.year-header {
+    background: #333;
+    color: white;
+    padding: 10px 15px;
+    font-weight: 600;
+}
+
+.terms-container {
+    display: flex;
+}
+
+.term {
+    flex: 1;
+    min-width: 100px;
+    border-right: 1px solid #ddd;
+}
+
+.term:last-child {
+    border-right: none;
+}
+
+.term-header {
+    padding: 8px 10px;
+    font-weight: 600;
+    text-align: center;
+    color: #333;
+}
+
+.term-header.fall {
+    background: #f6e05e;
+}
+
+.term-header.jterm {
+    background: #68d391;
+}
+
+.term-header.spring {
+    background: #63b3ed;
+}
+
+.term-header.summer1, .term-header.summer2 {
+    background: #fbd38d;
+}
+
+.courses-list {
+    min-height: 200px;
+    padding: 5px;
+}
+
+.course-item {
+    background: #f8f8f8;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 8px 10px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+}
+
+.course-item:hover {
+    background: #f0f0f0;
+}
+
+.course-code {
+    font-weight: 600;
+    color: #1a365d;
+}
+
+.course-credits {
+    color: #666;
+    font-size: 12px;
+}
+
+.course-item .remove-btn {
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 16px;
+}
+
+.course-item .remove-btn:hover {
+    color: #e53e3e;
+}
+
+.add-course-btn {
+    width: 100%;
+    padding: 8px;
+    background: transparent;
+    border: 2px dashed #ccc;
+    border-radius: 4px;
+    color: #999;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.add-course-btn:hover {
+    border-color: #999;
+    color: #666;
+}
+
+.term-credits {
+    padding: 8px 10px;
+    text-align: center;
+    font-weight: 600;
+    background: #f0f0f0;
+    border-top: 1px solid #ddd;
+}
+
+/* Credit Summary */
+#credit-summary {
+    background: white;
+    padding: 15px 30px;
+    display: flex;
+    gap: 40px;
+    border-top: 1px solid #ddd;
+}
+
+.summary-item {
+    display: flex;
+    gap: 10px;
+}
+
+.summary-item .label {
+    color: #666;
+}
+
+.summary-item span:last-child {
+    font-weight: 600;
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    font-size: 18px;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+}
+
+.close-btn:hover {
+    color: #333;
+}
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+}
+
+#course-search {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+#course-results {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.course-option {
+    padding: 12px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.course-option:hover {
+    background: #f0f7ff;
+    border-color: #2d4a7c;
+}
+
+.course-option-code {
+    font-weight: 600;
+    color: #1a365d;
+}
+
+.course-option-title {
+    color: #666;
+    font-size: 14px;
+    margin-top: 2px;
+}
+
+.course-option-credits {
+    color: #999;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* Summer terms hidden by default */
+.term.summer {
+    display: none;
+}
+
+.show-summer .term.summer {
+    display: block;
+}
