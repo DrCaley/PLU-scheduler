@@ -4,6 +4,7 @@
 let currentUser = null;
 let scheduleData = {};
 let selectedTerm = null;
+let editingStudentUsername = null; // Track which student's schedule faculty is editing
 
 // DOM Elements
 const loginScreen = document.getElementById('login-screen');
@@ -75,6 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Close student modal
     document.getElementById('close-student-modal').addEventListener('click', () => {
         document.getElementById('student-modal').classList.add('hidden');
+        editingStudentUsername = null;
+        renderStudentList(); // Refresh the list to show updated course counts
     });
     
     // Close modal on outside click
@@ -84,6 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('student-modal').addEventListener('click', (e) => {
         if (e.target.id === 'student-modal') {
             document.getElementById('student-modal').classList.add('hidden');
+            editingStudentUsername = null;
+            renderStudentList();
         }
     });
 });
@@ -397,9 +402,22 @@ function addCourse(code) {
     }
     
     scheduleData[year][term].push(code);
-    saveSchedule();
-    closeModal();
-    renderSchedule();
+    
+    // Save to the appropriate user's schedule
+    if (currentUser.isFaculty && editingStudentUsername) {
+        // Faculty editing a student's schedule
+        const schedules = JSON.parse(localStorage.getItem('plu_schedules') || '{}');
+        schedules[editingStudentUsername] = scheduleData;
+        localStorage.setItem('plu_schedules', JSON.stringify(schedules));
+        closeModal();
+        showStudentSchedule(editingStudentUsername);
+        renderAggregateView();
+    } else {
+        // Student editing their own schedule
+        saveSchedule();
+        closeModal();
+        renderSchedule();
+    }
 }
 
 function removeCourse(year, term, code) {
@@ -603,32 +621,160 @@ function showStudentSchedule(username) {
     
     if (!student || !schedule) return;
     
+    // Set the editing context
+    editingStudentUsername = username;
+    scheduleData = schedule;
+    
     document.getElementById('student-modal-title').textContent = `${student.name}'s Schedule`;
     
     const container = document.getElementById('student-schedule-view');
     container.innerHTML = '';
+    
+    // Render the full editable schedule grid (same as student view)
+    const scheduleContainer = document.createElement('div');
+    scheduleContainer.id = 'faculty-schedule-container';
+    scheduleContainer.className = 'faculty-schedule-grid';
     
     const years = Object.keys(schedule).sort();
     
     years.forEach(year => {
         const yearData = schedule[year];
         const yearBlock = document.createElement('div');
-        yearBlock.style.marginBottom = '20px';
+        yearBlock.className = 'year-block';
         
         const nextYear = parseInt(year) + 1;
         yearBlock.innerHTML = `
-            <h3 style="margin-bottom: 10px;">Year ${parseInt(year) - student.startYear + 1} (${year}-${String(nextYear).slice(2)})</h3>
-            <div style="display: flex; gap: 15px;">
-                ${renderStudentTerm('Fall', yearData.fall)}
-                ${renderStudentTerm('J-Term', yearData.jterm)}
-                ${renderStudentTerm('Spring', yearData.spring)}
+            <div class="year-header">Year ${parseInt(year) - student.startYear + 1} (${year}-${String(nextYear).slice(2)})</div>
+            <div class="terms-container">
+                ${renderTermForFaculty(year, 'fall', 'Fall', yearData.fall, username)}
+                ${renderTermForFaculty(year, 'jterm', 'J-Term', yearData.jterm, username)}
+                ${renderTermForFaculty(year, 'spring', 'Spring', yearData.spring, username)}
             </div>
         `;
         
-        container.appendChild(yearBlock);
+        scheduleContainer.appendChild(yearBlock);
     });
     
+    container.appendChild(scheduleContainer);
+    
+    // Add credit summary
+    const creditSummary = document.createElement('div');
+    creditSummary.className = 'faculty-credit-summary';
+    creditSummary.innerHTML = `
+        <div class="summary-item">
+            <span class="label">Total Credits:</span>
+            <span id="faculty-total-credits">0</span>
+        </div>
+        <div class="summary-item">
+            <span class="label">300+ Level:</span>
+            <span id="faculty-upper-credits">0</span>
+        </div>
+    `;
+    container.appendChild(creditSummary);
+    
+    // Add event listeners for add buttons
+    container.querySelectorAll('.add-course-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const year = btn.dataset.year;
+            const term = btn.dataset.term;
+            openCourseModal(year, term);
+        });
+    });
+    
+    // Add event listeners for remove buttons
+    container.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const year = btn.dataset.year;
+            const term = btn.dataset.term;
+            const code = btn.dataset.code;
+            removeCourseForStudent(username, year, term, code);
+        });
+    });
+    
+    updateFacultyCreditSummary();
+    
     document.getElementById('student-modal').classList.remove('hidden');
+}
+
+function renderTermForFaculty(year, termKey, termName, courses, username) {
+    const termCredits = courses.reduce((sum, code) => {
+        const course = getCourse(code);
+        return sum + (course ? course.credits : 0);
+    }, 0);
+    
+    const maxCourses = termKey === 'jterm' ? 3 : 7;
+    
+    return `
+        <div class="term">
+            <div class="term-header ${termKey}">${termName} ${year}</div>
+            <div class="courses-list">
+                ${courses.map(code => {
+                    const course = getCourse(code);
+                    return `
+                        <div class="course-item">
+                            <div>
+                                <span class="course-code">${code}</span>
+                                <span class="course-credits">(${course ? course.credits : '?'} cr)</span>
+                            </div>
+                            <button class="remove-btn" data-year="${year}" data-term="${termKey}" data-code="${code}">&times;</button>
+                        </div>
+                    `;
+                }).join('')}
+                ${courses.length < maxCourses ? `
+                    <button class="add-course-btn" data-year="${year}" data-term="${termKey}">+ Add Course</button>
+                ` : ''}
+            </div>
+            <div class="term-credits">${termCredits}</div>
+        </div>
+    `;
+}
+
+function removeCourseForStudent(username, year, term, code) {
+    const schedules = JSON.parse(localStorage.getItem('plu_schedules') || '{}');
+    const schedule = schedules[username];
+    
+    if (!schedule) return;
+    
+    const index = schedule[year][term].indexOf(code);
+    if (index > -1) {
+        schedule[year][term].splice(index, 1);
+        schedules[username] = schedule;
+        localStorage.setItem('plu_schedules', JSON.stringify(schedules));
+        
+        // Update the current view
+        scheduleData = schedule;
+        
+        // Re-render the student schedule
+        showStudentSchedule(username);
+        
+        // Update aggregate view
+        renderAggregateView();
+    }
+}
+
+function updateFacultyCreditSummary() {
+    let totalCredits = 0;
+    let upperCredits = 0;
+    
+    Object.values(scheduleData).forEach(yearData => {
+        Object.values(yearData).forEach(termCourses => {
+            termCourses.forEach(code => {
+                const course = getCourse(code);
+                if (course) {
+                    totalCredits += course.credits;
+                    const courseNum = parseInt(code.split(' ')[1]);
+                    if (courseNum >= 300) {
+                        upperCredits += course.credits;
+                    }
+                }
+            });
+        });
+    });
+    
+    const totalEl = document.getElementById('faculty-total-credits');
+    const upperEl = document.getElementById('faculty-upper-credits');
+    if (totalEl) totalEl.textContent = totalCredits;
+    if (upperEl) upperEl.textContent = upperCredits;
 }
 
 function renderStudentTerm(termName, courses) {

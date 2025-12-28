@@ -448,6 +448,35 @@ header h1 {
     overflow-y: auto;
 }
 
+/* Faculty schedule editing in modal */
+.faculty-schedule-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.faculty-schedule-grid .year-block {
+    min-width: auto;
+}
+
+.faculty-schedule-grid .terms-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.faculty-schedule-grid .term {
+    flex: 1;
+    min-width: 100px;
+}
+
+.faculty-credit-summary {
+    display: flex;
+    gap: 30px;
+    padding: 15px 0;
+    border-top: 1px solid #ddd;
+    margin-top: 15px;
+}
+
 /* Faculty fields spacing */
 #student-fields, #faculty-fields {
     display: flex;
