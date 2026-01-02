@@ -185,12 +185,15 @@ async function handleSetupSubmit(e) {
         const startYear = document.getElementById('setup-start-year').value;
         const majorSelect = document.getElementById('setup-major');
         const majors = Array.from(majorSelect.selectedOptions).map(opt => opt.value);
+        const minorSelect = document.getElementById('setup-minor');
+        const minors = Array.from(minorSelect.selectedOptions).map(opt => opt.value).filter(v => v !== '');
         if (!startYear || majors.length === 0) {
             alert('Please fill in all student fields (select at least one major)');
             return;
         }
         profileData.startYear = parseInt(startYear);
         profileData.majors = majors;
+        profileData.minors = minors;
         
         // Create empty schedule
         const schedule = createEmptySchedule(profileData.startYear);
@@ -267,7 +270,12 @@ function showScheduleScreen() {
     document.getElementById('user-display').textContent = userProfile.name;
     document.getElementById('student-name').textContent = userProfile.name;
     const majors = userProfile.majors || (userProfile.major ? [userProfile.major] : []);
-    document.getElementById('student-major').textContent = majors.join(', ') + (majors.length > 1 ? ' Majors' : ' Major');
+    const minors = userProfile.minors || [];
+    let programText = majors.join(', ');
+    if (minors.length > 0) {
+        programText += ' | Minors: ' + minors.join(', ');
+    }
+    document.getElementById('student-major').textContent = programText;
     document.getElementById('grad-year').textContent = userProfile.startYear + 4;
     
     renderSchedule();
@@ -641,11 +649,14 @@ async function renderStudentList() {
             sum + Object.values(terms).reduce((tSum, courses) => tSum + courses.length, 0), 0
         ) : 0;
         
+        const majorsText = student.majors ? student.majors.join(', ') : student.major;
+        const minorsText = student.minors && student.minors.length > 0 ? ' | Minor: ' + student.minors.join(', ') : '';
+        
         return `
             <div class="student-card" data-uid="${student.uid}">
                 <div class="student-card-name">${student.name}</div>
                 <div class="student-card-info">
-                    ${(student.majors ? student.majors.join(', ') : student.major)} • Class of ${student.startYear + 4} • ${totalCourses} courses planned
+                    ${majorsText}${minorsText} • Class of ${student.startYear + 4} • ${totalCourses} courses planned
                 </div>
             </div>
         `;

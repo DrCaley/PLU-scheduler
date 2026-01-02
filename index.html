@@ -55,15 +55,127 @@
                     </div>
                     <div class="form-group">
                         <label>Majors <span style="font-weight:normal;font-size:0.9em;">(hold Ctrl/Cmd to select multiple)</span></label>
-                        <select id="setup-major" multiple size="6">
-                            <option value="CSCI">Computer Science</option>
-                            <option value="MATH">Mathematics</option>
-                            <option value="BIOL">Biology</option>
-                            <option value="CHEM">Chemistry</option>
-                            <option value="PHYS">Physics</option>
-                            <option value="ENGL">English</option>
-                            <option value="HIST">History</option>
-                            <option value="OTHER">Other</option>
+                        <select id="setup-major" multiple size="8">
+                            <!-- College of Natural Sciences -->
+                            <optgroup label="College of Natural Sciences">
+                                <option value="Biology">Biology (B.A., B.S.)</option>
+                                <option value="Biochemistry">Biochemistry (B.S.)</option>
+                                <option value="Chemistry">Chemistry (B.A., B.S.)</option>
+                                <option value="Chemical Physics">Chemical Physics (B.S.)</option>
+                                <option value="Computer Science">Computer Science (B.A., B.S.)</option>
+                                <option value="Earth Science">Earth Science (B.A.)</option>
+                                <option value="Environmental Studies">Environmental Studies (B.A.)</option>
+                                <option value="Mathematics">Mathematics (B.A., B.S.)</option>
+                                <option value="Applied Mathematics">Applied Mathematics (B.S.)</option>
+                                <option value="Mathematics Education">Mathematics Education (B.S.)</option>
+                                <option value="Physics">Physics (B.A., B.S.)</option>
+                                <option value="Applied Physics">Applied Physics (B.S.)</option>
+                                <option value="Psychology">Psychology (B.A., B.S.)</option>
+                            </optgroup>
+                            <!-- College of Professional Studies -->
+                            <optgroup label="College of Professional Studies">
+                                <option value="Art History">Art History (B.A.)</option>
+                                <option value="Business Administration">Business Administration (B.B.A.)</option>
+                                <option value="Communication">Communication (B.A.C.)</option>
+                                <option value="Elementary Education">Elementary Education (B.A.E.)</option>
+                                <option value="Music">Music (B.A., B.M., B.M.A.)</option>
+                                <option value="Music Education">Music Education (B.M.E.)</option>
+                                <option value="Music Therapy">Music Therapy (B.S.)</option>
+                                <option value="Studio Arts">Studio Arts (B.A., B.F.A.)</option>
+                                <option value="Theatre">Theatre (B.A., B.F.A.)</option>
+                            </optgroup>
+                            <!-- College of Liberal Studies -->
+                            <optgroup label="College of Liberal Studies">
+                                <option value="Chinese Studies">Chinese Studies (B.A.)</option>
+                                <option value="Criminal Justice">Criminal Justice (B.A.)</option>
+                                <option value="Economics">Economics (B.A.)</option>
+                                <option value="English">English (B.A.)</option>
+                                <option value="French & Francophone Studies">French & Francophone Studies (B.A.)</option>
+                                <option value="Gender, Sexuality, and Race Studies">Gender, Sexuality, and Race Studies (B.A.)</option>
+                                <option value="Global Studies">Global Studies (B.A.)</option>
+                                <option value="Hispanic Studies">Hispanic Studies (B.A.)</option>
+                                <option value="History">History (B.A.)</option>
+                                <option value="Individualized Major">Individualized Major (B.A.)</option>
+                                <option value="Philosophy">Philosophy (B.A.)</option>
+                                <option value="Political Science">Political Science (B.A.)</option>
+                                <option value="Religion">Religion (B.A.)</option>
+                                <option value="Sociology">Sociology (B.A.)</option>
+                            </optgroup>
+                            <!-- College of Health Professions -->
+                            <optgroup label="College of Health Professions">
+                                <option value="Kinesiology">Kinesiology (B.A.K., B.S.K.)</option>
+                                <option value="Nursing">Nursing (B.S.N.)</option>
+                                <option value="Social Work">Social Work (B.S.W.)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Minors <span style="font-weight:normal;font-size:0.9em;">(optional, hold Ctrl/Cmd to select multiple)</span></label>
+                        <select id="setup-minor" multiple size="6">
+                            <option value="">-- No Minor --</option>
+                            <optgroup label="Natural Sciences & Math">
+                                <option value="Biology">Biology</option>
+                                <option value="Chemistry">Chemistry</option>
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Data Science">Data Science</option>
+                                <option value="Earth Science">Earth Science</option>
+                                <option value="Environmental Studies">Environmental Studies</option>
+                                <option value="Mathematics">Mathematics</option>
+                                <option value="Physics">Physics</option>
+                                <option value="Psychology">Psychology</option>
+                                <option value="Statistics">Statistics</option>
+                                <option value="STEM Education">STEM Education</option>
+                            </optgroup>
+                            <optgroup label="Business & Professional">
+                                <option value="Actuarial Science">Actuarial Science</option>
+                                <option value="Business Administration">Business Administration</option>
+                                <option value="Business Nonprofit Leadership">Business Nonprofit Leadership</option>
+                                <option value="Communication">Communication</option>
+                                <option value="Engineering & Industry">Engineering & Industry</option>
+                                <option value="Innovation Studies">Innovation Studies</option>
+                                <option value="Publishing and Printing Arts">Publishing and Printing Arts</option>
+                            </optgroup>
+                            <optgroup label="Arts & Humanities">
+                                <option value="Art History">Art History</option>
+                                <option value="Dance">Dance</option>
+                                <option value="English">Literature, Culture, & Power</option>
+                                <option value="History">History</option>
+                                <option value="Music - General">Music - General</option>
+                                <option value="Music - Specialized">Music - Specialized</option>
+                                <option value="Philosophy">Philosophy</option>
+                                <option value="Religion">Religion</option>
+                                <option value="Studio Arts">Studio Arts</option>
+                                <option value="Theatre">Theatre</option>
+                                <option value="Writing">Writing</option>
+                            </optgroup>
+                            <optgroup label="Social Sciences">
+                                <option value="Anthropology">Anthropology</option>
+                                <option value="Conflict Resolution">Conflict Resolution</option>
+                                <option value="Criminal Justice">Criminal Justice</option>
+                                <option value="Economics">Economics</option>
+                                <option value="Political Science">Political Science</option>
+                                <option value="Pre-Law">Pre-Law</option>
+                                <option value="Public Affairs">Public Affairs</option>
+                                <option value="Social Work">Social Work</option>
+                                <option value="Sociology">Sociology</option>
+                            </optgroup>
+                            <optgroup label="Global & Cultural Studies">
+                                <option value="Chinese">Chinese</option>
+                                <option value="Chinese Studies">Chinese Studies</option>
+                                <option value="Critical Race Studies">Critical Race Studies</option>
+                                <option value="French & Francophone Studies">French & Francophone Studies</option>
+                                <option value="Gender & Sexuality Studies">Gender & Sexuality Studies</option>
+                                <option value="Global Studies">Global Studies</option>
+                                <option value="Hispanic Studies">Hispanic Studies</option>
+                                <option value="Holocaust and Genocide Studies">Holocaust and Genocide Studies</option>
+                                <option value="Latino Studies">Latino Studies</option>
+                                <option value="Native American & Indigenous Studies">Native American & Indigenous Studies</option>
+                            </optgroup>
+                            <optgroup label="Health & Kinesiology">
+                                <option value="Exercise and Sport Psychology">Exercise and Sport Psychology</option>
+                                <option value="Health Services">Health Services</option>
+                                <option value="Kinesiology">Kinesiology</option>
+                            </optgroup>
                         </select>
                     </div>
                 </div>
