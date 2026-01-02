@@ -1058,6 +1058,17 @@ function renderGenEdSection(schedule) {
         if (plannedCourses.some(c => c.toUpperCase() === reqCode.toUpperCase())) {
             return true;
         }
+        // Check for combined placeholders (e.g., "NW+GE" satisfies both NW and GE)
+        if (plannedCourses.some(c => {
+            const upper = c.toUpperCase();
+            if (upper.includes('+')) {
+                const parts = upper.split('+');
+                return parts.includes(reqCode.toUpperCase());
+            }
+            return false;
+        })) {
+            return true;
+        }
         // If specific course required (like FYEP 101)
         if (reqCourse) {
             return plannedCourses.some(c => courseMatches(c, reqCourse));

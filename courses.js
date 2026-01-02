@@ -14,6 +14,18 @@ const COURSES = [
     { code: 'QR', title: 'Quantitative Reasoning Requirement', credits: 4, prereqs: [], genEd: ['QR'], isPlaceholder: true },
     { code: 'SR', title: 'Senior Culminating Experience', credits: 2, prereqs: [], genEd: ['SR'], isPlaceholder: true },
     
+    // Combined GenEd Placeholders (courses that satisfy multiple requirements)
+    { code: 'NW+GE', title: 'Natural World + Global Engagement', credits: 4, prereqs: [], genEd: ['NW', 'GE'], isPlaceholder: true },
+    { code: 'IT+GE', title: 'Interpreting Text + Global Engagement', credits: 4, prereqs: [], genEd: ['IT', 'GE'], isPlaceholder: true },
+    { code: 'ES+GE', title: 'Examining Self & Society + Global Engagement', credits: 4, prereqs: [], genEd: ['ES', 'GE'], isPlaceholder: true },
+    { code: 'VW+GE', title: 'Values & Worldviews + Global Engagement', credits: 4, prereqs: [], genEd: ['VW', 'GE'], isPlaceholder: true },
+    { code: 'CX+GE', title: 'Creative Expression + Global Engagement', credits: 4, prereqs: [], genEd: ['CX', 'GE'], isPlaceholder: true },
+    { code: 'RL+GE', title: 'Religion + Global Engagement', credits: 4, prereqs: [], genEd: ['RL', 'GE'], isPlaceholder: true },
+    { code: 'IT+VW', title: 'Interpreting Text + Values & Worldviews', credits: 4, prereqs: [], genEd: ['IT', 'VW'], isPlaceholder: true },
+    { code: 'ES+VW', title: 'Examining Self & Society + Values & Worldviews', credits: 4, prereqs: [], genEd: ['ES', 'VW'], isPlaceholder: true },
+    { code: 'CX+IT', title: 'Creative Expression + Interpreting Text', credits: 4, prereqs: [], genEd: ['CX', 'IT'], isPlaceholder: true },
+    { code: 'NW+QR', title: 'Natural World + Quantitative Reasoning', credits: 4, prereqs: [], genEd: ['NW', 'QR'], isPlaceholder: true },
+    
     // First-Year Experience Program (FYEP)
     { code: 'FYEP 101', title: 'First-Year Writing - FW', credits: 4, prereqs: [], genEd: ['FW'] },
     { code: 'FYEP 102', title: 'First-Year Diversity - FD', credits: 4, prereqs: [], genEd: ['FD'] },
