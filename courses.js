@@ -14,18 +14,6 @@ const COURSES = [
     { code: 'QR', title: 'Quantitative Reasoning Requirement', credits: 4, prereqs: [], genEd: ['QR'], isPlaceholder: true },
     { code: 'SR', title: 'Senior Culminating Experience', credits: 2, prereqs: [], genEd: ['SR'], isPlaceholder: true },
     
-    // Combined GenEd Placeholders (courses that satisfy multiple requirements)
-    { code: 'NW+GE', title: 'Natural World + Global Engagement', credits: 4, prereqs: [], genEd: ['NW', 'GE'], isPlaceholder: true },
-    { code: 'IT+GE', title: 'Interpreting Text + Global Engagement', credits: 4, prereqs: [], genEd: ['IT', 'GE'], isPlaceholder: true },
-    { code: 'ES+GE', title: 'Examining Self & Society + Global Engagement', credits: 4, prereqs: [], genEd: ['ES', 'GE'], isPlaceholder: true },
-    { code: 'VW+GE', title: 'Values & Worldviews + Global Engagement', credits: 4, prereqs: [], genEd: ['VW', 'GE'], isPlaceholder: true },
-    { code: 'CX+GE', title: 'Creative Expression + Global Engagement', credits: 4, prereqs: [], genEd: ['CX', 'GE'], isPlaceholder: true },
-    { code: 'RL+GE', title: 'Religion + Global Engagement', credits: 4, prereqs: [], genEd: ['RL', 'GE'], isPlaceholder: true },
-    { code: 'IT+VW', title: 'Interpreting Text + Values & Worldviews', credits: 4, prereqs: [], genEd: ['IT', 'VW'], isPlaceholder: true },
-    { code: 'ES+VW', title: 'Examining Self & Society + Values & Worldviews', credits: 4, prereqs: [], genEd: ['ES', 'VW'], isPlaceholder: true },
-    { code: 'CX+IT', title: 'Creative Expression + Interpreting Text', credits: 4, prereqs: [], genEd: ['CX', 'IT'], isPlaceholder: true },
-    { code: 'NW+QR', title: 'Natural World + Quantitative Reasoning', credits: 4, prereqs: [], genEd: ['NW', 'QR'], isPlaceholder: true },
-    
     // First-Year Experience Program (FYEP)
     { code: 'FYEP 101', title: 'First-Year Writing - FW', credits: 4, prereqs: [], genEd: ['FW'] },
     { code: 'FYEP 102', title: 'First-Year Diversity - FD', credits: 4, prereqs: [], genEd: ['FD'] },
@@ -277,16 +265,75 @@ const COURSES = [
     { code: 'NORW 202', title: 'Intermediate Norwegian II - GE', credits: 4, prereqs: ['NORW 201'], genEd: ['GE'] },
 ];
 
+// Valid GenEd codes for dynamic combination support
+const GENED_CODES = ['FW', 'FD', 'RL', 'FT', 'GE', 'CX', 'NW', 'IT', 'ES', 'VW', 'QR', 'SR'];
+
+const GENED_NAMES = {
+    'FW': 'First-Year Writing',
+    'FD': 'First-Year Diversity', 
+    'RL': 'Religion',
+    'FT': 'Fitness & Wellness',
+    'GE': 'Global Engagement',
+    'CX': 'Creative Expression',
+    'NW': 'Natural World',
+    'IT': 'Interpreting Text',
+    'ES': 'Examining Self & Society',
+    'VW': 'Values & Worldviews',
+    'QR': 'Quantitative Reasoning',
+    'SR': 'Senior Culminating'
+};
+
+// Check if a string is a valid GenEd combo (e.g., "NW+GE" or "IT+VW+GE")
+function isValidGenEdCombo(str) {
+    const upper = str.toUpperCase().trim();
+    if (!upper.includes('+')) return false;
+    const parts = upper.split('+');
+    return parts.length >= 2 && parts.every(p => GENED_CODES.includes(p.trim()));
+}
+
+// Create a dynamic GenEd combo course object
+function createGenEdCombo(code) {
+    const upper = code.toUpperCase().trim();
+    const parts = upper.split('+').map(p => p.trim());
+    const title = parts.map(p => GENED_NAMES[p] || p).join(' + ');
+    return {
+        code: upper,
+        title: title,
+        credits: 4,
+        prereqs: [],
+        genEd: parts,
+        isPlaceholder: true,
+        isDynamic: true
+    };
+}
+
 // Get course by code
 function getCourse(code) {
-    return COURSES.find(c => c.code === code);
+    const found = COURSES.find(c => c.code === code);
+    if (found) return found;
+    // Check for dynamic GenEd combo
+    if (isValidGenEdCombo(code)) {
+        return createGenEdCombo(code);
+    }
+    return null;
 }
 
 // Search courses
 function searchCourses(query) {
-    const q = query.toLowerCase();
-    return COURSES.filter(c => 
+    const q = query.toLowerCase().trim();
+    const results = COURSES.filter(c => 
         c.code.toLowerCase().includes(q) || 
         c.title.toLowerCase().includes(q)
     ).slice(0, 10);
+    
+    // If query looks like a GenEd combo (contains +), add it as an option
+    if (isValidGenEdCombo(query)) {
+        const combo = createGenEdCombo(query);
+        // Add at the beginning if not already in results
+        if (!results.find(r => r.code === combo.code)) {
+            results.unshift(combo);
+        }
+    }
+    
+    return results;
 }
