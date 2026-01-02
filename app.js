@@ -78,6 +78,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.close-btn').addEventListener('click', closeModal);
     document.getElementById('course-search').addEventListener('input', handleCourseSearch);
     
+    // Profile modal event listeners
+    document.getElementById('profile-btn').addEventListener('click', openProfileModal);
+    document.getElementById('close-profile-modal').addEventListener('click', closeProfileModal);
+    document.getElementById('cancel-profile-btn').addEventListener('click', closeProfileModal);
+    document.getElementById('profile-form').addEventListener('submit', handleProfileUpdate);
+    document.getElementById('profile-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'profile-modal') closeProfileModal();
+    });
+    
     // Faculty view tabs
     document.getElementById('tab-aggregate').addEventListener('click', () => switchFacultyTab('aggregate'));
     document.getElementById('tab-students').addEventListener('click', () => switchFacultyTab('students'));
@@ -279,6 +288,79 @@ function showScheduleScreen() {
     document.getElementById('grad-year').textContent = userProfile.startYear + 4;
     
     renderSchedule();
+}
+
+// ==================== PROFILE MODAL ====================
+
+function openProfileModal() {
+    const modal = document.getElementById('profile-modal');
+    
+    // Populate form with current profile data
+    document.getElementById('profile-name').value = userProfile.name || '';
+    document.getElementById('profile-email').value = currentUser.email || '';
+    
+    // Set selected majors
+    const majorSelect = document.getElementById('profile-major');
+    const majors = userProfile.majors || [];
+    Array.from(majorSelect.options).forEach(option => {
+        option.selected = majors.includes(option.value);
+    });
+    
+    // Set selected minors
+    const minorSelect = document.getElementById('profile-minor');
+    const minors = userProfile.minors || [];
+    Array.from(minorSelect.options).forEach(option => {
+        option.selected = minors.includes(option.value);
+    });
+    
+    modal.classList.remove('hidden');
+}
+
+function closeProfileModal() {
+    document.getElementById('profile-modal').classList.add('hidden');
+}
+
+async function handleProfileUpdate(e) {
+    e.preventDefault();
+    
+    // Get selected majors
+    const majorSelect = document.getElementById('profile-major');
+    const majors = Array.from(majorSelect.selectedOptions).map(opt => opt.value);
+    
+    // Get selected minors
+    const minorSelect = document.getElementById('profile-minor');
+    const minors = Array.from(minorSelect.selectedOptions).map(opt => opt.value).filter(v => v !== '');
+    
+    if (majors.length === 0) {
+        alert('Please select at least one major');
+        return;
+    }
+    
+    try {
+        // Update profile in Firestore
+        await db.collection('users').doc(currentUser.uid).update({
+            majors: majors,
+            minors: minors,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        // Update local profile
+        userProfile.majors = majors;
+        userProfile.minors = minors;
+        
+        // Update display
+        let programText = majors.join(', ');
+        if (minors.length > 0) {
+            programText += ' | Minors: ' + minors.join(', ');
+        }
+        document.getElementById('student-major').textContent = programText;
+        
+        closeProfileModal();
+        alert('Profile updated successfully!');
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        alert('Failed to update profile: ' + error.message);
+    }
 }
 
 function renderSchedule() {
