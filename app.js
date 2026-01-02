@@ -97,6 +97,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('tab-aggregate').addEventListener('click', () => switchFacultyTab('aggregate'));
     document.getElementById('tab-students').addEventListener('click', () => switchFacultyTab('students'));
     
+    // Student view tabs
+    document.getElementById('tab-schedule').addEventListener('click', () => switchStudentTab('schedule'));
+    document.getElementById('tab-requirements').addEventListener('click', () => switchStudentTab('requirements'));
+    
     // Filter change
     document.getElementById('filter-dept').addEventListener('change', renderAggregateView);
     
@@ -692,6 +696,230 @@ function switchFacultyTab(tab) {
         tabAggregate.classList.remove('active');
         tabStudents.classList.add('active');
     }
+}
+
+// ==================== STUDENT TABS ====================
+
+function switchStudentTab(tab) {
+    const scheduleView = document.getElementById('schedule-view');
+    const requirementsView = document.getElementById('requirements-view');
+    const tabSchedule = document.getElementById('tab-schedule');
+    const tabRequirements = document.getElementById('tab-requirements');
+    
+    if (tab === 'schedule') {
+        scheduleView.classList.remove('hidden');
+        requirementsView.classList.add('hidden');
+        tabSchedule.classList.add('active');
+        tabRequirements.classList.remove('active');
+    } else {
+        scheduleView.classList.add('hidden');
+        requirementsView.classList.remove('hidden');
+        tabSchedule.classList.remove('active');
+        tabRequirements.classList.add('active');
+        renderRequirements();
+    }
+}
+
+function renderRequirements() {
+    const container = document.getElementById('requirements-container');
+    const majors = userProfile.majors || [];
+    const minors = userProfile.minors || [];
+    
+    // Check if user has majors/minors
+    if (majors.length === 0 && minors.length === 0) {
+        container.innerHTML = `
+            <div class="no-requirements">
+                <h3>No Major or Minor Selected</h3>
+                <p>Click "Edit Profile" to add your majors and minors.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Calculate requirements
+    const results = checkRequirements(majors, minors, scheduleData);
+    
+    // Build HTML
+    let html = '';
+    
+    // Summary cards
+    html += `
+        <div class="requirements-summary">
+            <div class="summary-card">
+                <h3>Total Credits</h3>
+                <div class="value">${results.totalCredits}</div>
+                <div class="subtext">of 128 required</div>
+            </div>
+            <div class="summary-card">
+                <h3>Upper Division</h3>
+                <div class="value">${results.upperCredits}</div>
+                <div class="subtext">300+ level credits</div>
+            </div>
+            <div class="summary-card">
+                <h3>Majors</h3>
+                <div class="value">${majors.length}</div>
+                <div class="subtext">${majors.join(', ') || 'None'}</div>
+            </div>
+            <div class="summary-card">
+                <h3>Minors</h3>
+                <div class="value">${minors.length}</div>
+                <div class="subtext">${minors.join(', ') || 'None'}</div>
+            </div>
+        </div>
+    `;
+    
+    // Major requirements
+    results.majors.forEach((major, index) => {
+        const percent = major.total > 0 ? Math.round((major.completed / major.total) * 100) : 0;
+        html += renderRequirementSection(major, 'major', index);
+    });
+    
+    // Minor requirements
+    results.minors.forEach((minor, index) => {
+        const percent = minor.total > 0 ? Math.round((minor.completed / minor.total) * 100) : 0;
+        html += renderRequirementSection(minor, 'minor', index);
+    });
+    
+    // Check for majors/minors without requirement data
+    const majorsWithData = results.majors.map(m => m.name);
+    const minorsWithData = results.minors.map(m => m.name);
+    
+    majors.forEach(major => {
+        if (!majorsWithData.some(m => m.includes(major))) {
+            html += `
+                <div class="requirement-section">
+                    <div class="requirement-header">
+                        <h3>
+                            ${major}
+                            <span class="type-badge">Major</span>
+                        </h3>
+                        <div class="progress-info">
+                            <span class="progress-text">Data not available</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    });
+    
+    minors.forEach(minor => {
+        if (!minorsWithData.some(m => m.includes(minor))) {
+            html += `
+                <div class="requirement-section">
+                    <div class="requirement-header">
+                        <h3>
+                            ${minor}
+                            <span class="type-badge minor">Minor</span>
+                        </h3>
+                        <div class="progress-info">
+                            <span class="progress-text">Data not available</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    });
+    
+    container.innerHTML = html;
+    
+    // Add click handlers for expand/collapse
+    container.querySelectorAll('.requirement-header').forEach(header => {
+        header.addEventListener('click', () => {
+            const body = header.nextElementSibling;
+            if (body && body.classList.contains('requirement-body')) {
+                header.classList.toggle('expanded');
+                body.classList.toggle('expanded');
+            }
+        });
+    });
+}
+
+function renderRequirementSection(req, type, index) {
+    const percent = req.total > 0 ? Math.round((req.completed / req.total) * 100) : 0;
+    const badgeClass = type === 'minor' ? 'type-badge minor' : 'type-badge';
+    
+    let html = `
+        <div class="requirement-section">
+            <div class="requirement-header">
+                <h3>
+                    ${req.name}
+                    <span class="${badgeClass}">${type === 'minor' ? 'Minor' : 'Major'}</span>
+                </h3>
+                <div class="progress-info">
+                    <div class="progress-bar">
+                        <div class="fill" style="width: ${percent}%"></div>
+                    </div>
+                    <span class="progress-text">${req.completed}/${req.total} (${percent}%)</span>
+                    <span class="collapse-icon">▼</span>
+                </div>
+            </div>
+            <div class="requirement-body">
+    `;
+    
+    // Required courses
+    if (req.required && req.required.length > 0) {
+        html += `
+            <div class="req-category">
+                <h4>Required Courses</h4>
+                <div class="req-list">
+        `;
+        req.required.forEach(course => {
+            const statusClass = course.completed ? 'completed' : 'incomplete';
+            const checkIcon = course.completed ? '✓' : '○';
+            html += `
+                <div class="req-item ${statusClass}">
+                    <div class="req-check">${checkIcon}</div>
+                    <div class="req-details">
+                        <span class="req-code">${course.code}</span>
+                        <span class="req-title">${course.title}</span>
+                    </div>
+                    <span class="req-credits">${course.credits} cr</span>
+                </div>
+            `;
+        });
+        html += '</div></div>';
+    }
+    
+    // Electives
+    if (req.electives) {
+        const elecComplete = req.electives.completed >= req.electives.required;
+        html += `
+            <div class="req-category">
+                <h4>Electives</h4>
+                <div class="electives-box ${elecComplete ? 'complete' : ''}">
+                    <div class="elective-desc">${req.electives.description}</div>
+                    <div class="elective-progress">${req.electives.completed}/${req.electives.required} completed</div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Supporting courses
+    if (req.supporting && req.supporting.length > 0) {
+        html += `
+            <div class="req-category">
+                <h4>Supporting Courses</h4>
+                <div class="req-list">
+        `;
+        req.supporting.forEach(course => {
+            const statusClass = course.completed ? 'completed' : 'incomplete';
+            const checkIcon = course.completed ? '✓' : '○';
+            html += `
+                <div class="req-item ${statusClass}">
+                    <div class="req-check">${checkIcon}</div>
+                    <div class="req-details">
+                        <span class="req-code">${course.code}</span>
+                        <span class="req-title">${course.title}</span>
+                    </div>
+                    <span class="req-credits">${course.credits} cr</span>
+                </div>
+            `;
+        });
+        html += '</div></div>';
+    }
+    
+    html += '</div></div>';
+    return html;
 }
 
 async function renderAggregateView() {

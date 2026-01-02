@@ -60,19 +60,25 @@
                             <select id="setup-major-select" class="add-field-select">
                                 <option value="">Select a major...</option>
                                 <optgroup label="College of Natural Sciences">
-                                    <option value="Biology">Biology (B.A., B.S.)</option>
-                                    <option value="Biochemistry">Biochemistry (B.S.)</option>
-                                    <option value="Chemistry">Chemistry (B.A., B.S.)</option>
-                                    <option value="Chemical Physics">Chemical Physics (B.S.)</option>
-                                    <option value="Computer Science">Computer Science (B.A., B.S.)</option>
+                                    <option value="Biology (B.A.)">Biology (B.A.)</option>
+                                    <option value="Biology (B.S.)">Biology (B.S.)</option>
+                                    <option value="Biochemistry (B.S.)">Biochemistry (B.S.)</option>
+                                    <option value="Chemistry (B.A.)">Chemistry (B.A.)</option>
+                                    <option value="Chemistry (B.S.)">Chemistry (B.S.)</option>
+                                    <option value="Chemical Physics (B.S.)">Chemical Physics (B.S.)</option>
+                                    <option value="Computer Science (B.A.)">Computer Science (B.A.)</option>
+                                    <option value="Computer Science (B.S.)">Computer Science (B.S.)</option>
                                     <option value="Earth Science">Earth Science (B.A.)</option>
                                     <option value="Environmental Studies">Environmental Studies (B.A.)</option>
-                                    <option value="Mathematics">Mathematics (B.A., B.S.)</option>
-                                    <option value="Applied Mathematics">Applied Mathematics (B.S.)</option>
-                                    <option value="Mathematics Education">Mathematics Education (B.S.)</option>
-                                    <option value="Physics">Physics (B.A., B.S.)</option>
-                                    <option value="Applied Physics">Applied Physics (B.S.)</option>
-                                    <option value="Psychology">Psychology (B.A., B.S.)</option>
+                                    <option value="Mathematics (B.A.)">Mathematics (B.A.)</option>
+                                    <option value="Mathematics (B.S.)">Mathematics (B.S.)</option>
+                                    <option value="Applied Mathematics (B.S.)">Applied Mathematics (B.S.)</option>
+                                    <option value="Mathematics Education (B.S.)">Mathematics Education (B.S.)</option>
+                                    <option value="Physics (B.A.)">Physics (B.A.)</option>
+                                    <option value="Physics (B.S.)">Physics (B.S.)</option>
+                                    <option value="Applied Physics (B.S.)">Applied Physics (B.S.)</option>
+                                    <option value="Psychology (B.A.)">Psychology (B.A.)</option>
+                                    <option value="Psychology (B.S.)">Psychology (B.S.)</option>
                                 </optgroup>
                                 <optgroup label="College of Professional Studies">
                                     <option value="Art History">Art History (B.A.)</option>
@@ -212,6 +218,10 @@
                 <span id="student-major"></span>
                 <span>Expected Graduation: <span id="grad-year"></span></span>
             </div>
+            <div class="student-tabs">
+                <button class="tab-btn active" id="tab-schedule">Schedule</button>
+                <button class="tab-btn" id="tab-requirements">Requirements</button>
+            </div>
             <div class="toolbar-actions">
                 <label>
                     <input type="checkbox" id="show-summer"> Show Summer Sessions
@@ -219,18 +229,28 @@
             </div>
         </div>
 
-        <div id="schedule-container">
-            <!-- Years will be generated here -->
+        <!-- Schedule View -->
+        <div id="schedule-view" class="student-content">
+            <div id="schedule-container">
+                <!-- Years will be generated here -->
+            </div>
+
+            <div id="credit-summary">
+                <div class="summary-item">
+                    <span class="label">Total Credits:</span>
+                    <span id="total-credits">0</span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">300+ Level:</span>
+                    <span id="upper-credits">0</span>
+                </div>
+            </div>
         </div>
 
-        <div id="credit-summary">
-            <div class="summary-item">
-                <span class="label">Total Credits:</span>
-                <span id="total-credits">0</span>
-            </div>
-            <div class="summary-item">
-                <span class="label">300+ Level:</span>
-                <span id="upper-credits">0</span>
+        <!-- Requirements View -->
+        <div id="requirements-view" class="student-content hidden">
+            <div id="requirements-container">
+                <!-- Requirements will be generated here -->
             </div>
         </div>
     </div>
@@ -318,19 +338,25 @@
                             <select id="profile-major-select" class="add-field-select">
                                 <option value="">Select a major...</option>
                                 <optgroup label="College of Natural Sciences">
-                                    <option value="Biology">Biology (B.A., B.S.)</option>
-                                    <option value="Biochemistry">Biochemistry (B.S.)</option>
-                                    <option value="Chemistry">Chemistry (B.A., B.S.)</option>
-                                    <option value="Chemical Physics">Chemical Physics (B.S.)</option>
-                                    <option value="Computer Science">Computer Science (B.A., B.S.)</option>
+                                    <option value="Biology (B.A.)">Biology (B.A.)</option>
+                                    <option value="Biology (B.S.)">Biology (B.S.)</option>
+                                    <option value="Biochemistry (B.S.)">Biochemistry (B.S.)</option>
+                                    <option value="Chemistry (B.A.)">Chemistry (B.A.)</option>
+                                    <option value="Chemistry (B.S.)">Chemistry (B.S.)</option>
+                                    <option value="Chemical Physics (B.S.)">Chemical Physics (B.S.)</option>
+                                    <option value="Computer Science (B.A.)">Computer Science (B.A.)</option>
+                                    <option value="Computer Science (B.S.)">Computer Science (B.S.)</option>
                                     <option value="Earth Science">Earth Science (B.A.)</option>
                                     <option value="Environmental Studies">Environmental Studies (B.A.)</option>
-                                    <option value="Mathematics">Mathematics (B.A., B.S.)</option>
-                                    <option value="Applied Mathematics">Applied Mathematics (B.S.)</option>
-                                    <option value="Mathematics Education">Mathematics Education (B.S.)</option>
-                                    <option value="Physics">Physics (B.A., B.S.)</option>
-                                    <option value="Applied Physics">Applied Physics (B.S.)</option>
-                                    <option value="Psychology">Psychology (B.A., B.S.)</option>
+                                    <option value="Mathematics (B.A.)">Mathematics (B.A.)</option>
+                                    <option value="Mathematics (B.S.)">Mathematics (B.S.)</option>
+                                    <option value="Applied Mathematics (B.S.)">Applied Mathematics (B.S.)</option>
+                                    <option value="Mathematics Education (B.S.)">Mathematics Education (B.S.)</option>
+                                    <option value="Physics (B.A.)">Physics (B.A.)</option>
+                                    <option value="Physics (B.S.)">Physics (B.S.)</option>
+                                    <option value="Applied Physics (B.S.)">Applied Physics (B.S.)</option>
+                                    <option value="Psychology (B.A.)">Psychology (B.A.)</option>
+                                    <option value="Psychology (B.S.)">Psychology (B.S.)</option>
                                 </optgroup>
                                 <optgroup label="College of Professional Studies">
                                     <option value="Art History">Art History (B.A.)</option>
@@ -465,6 +491,7 @@
     </div>
 
     <script src="courses.js"></script>
+    <script src="requirements.js"></script>
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
