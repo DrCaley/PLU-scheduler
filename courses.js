@@ -335,5 +335,26 @@ function searchCourses(query) {
         }
     }
     
+    // If query ends with + (e.g., "NW+"), show all possible completions
+    const upper = query.toUpperCase().trim();
+    if (upper.endsWith('+')) {
+        const prefix = upper.slice(0, -1); // Remove trailing +
+        const existingCodes = prefix.split('+').map(p => p.trim()).filter(p => p);
+        
+        // Check if all existing codes are valid
+        if (existingCodes.every(code => GENED_CODES.includes(code))) {
+            // Add all possible completions
+            GENED_CODES.forEach(code => {
+                if (!existingCodes.includes(code)) {
+                    const comboCode = prefix + '+' + code;
+                    const combo = createGenEdCombo(comboCode);
+                    if (!results.find(r => r.code === combo.code)) {
+                        results.push(combo);
+                    }
+                }
+            });
+        }
+    }
+    
     return results;
 }
