@@ -85,18 +85,22 @@ const REQUIREMENTS = {
                 { code: 'MATH 499B', title: 'Capstone: Senior Seminar II', credits: 2 }
             ],
             electivesChoice: {
-                description: 'One Introduction to Proofs course',
+                description: 'One Introduction to Proofs course (MATH 317, 318, or 319)',
                 count: 1,
                 credits: 4,
                 options: ['MATH 317', 'MATH 318', 'MATH 319']
             },
             supporting: [
                 { code: 'CSCI 144', title: 'Introduction to Computer Science', credits: 4 }
-            ]
+            ],
+            recommended: {
+                description: 'Strongly recommended (not required): one course from CSCI 371, ECON 344, or PHYS 153',
+                options: ['CSCI 371', 'ECON 344', 'PHYS 153']
+            }
         },
         'Mathematics (B.S.)': {
             name: 'Mathematics (B.S.)',
-            totalCredits: 48,
+            totalCredits: 49,
             required: [
                 { code: 'MATH 152', title: 'Calculus II', credits: 4 },
                 { code: 'MATH 242', title: 'Introduction to Mathematical Statistics', credits: 4 },
@@ -108,13 +112,13 @@ const REQUIREMENTS = {
                 { code: 'MATH 499B', title: 'Capstone: Senior Seminar II', credits: 2 }
             ],
             electivesChoice: {
-                description: 'One Introduction to Proofs course',
+                description: 'One Introduction to Proofs course (MATH 317, 318, or 319)',
                 count: 1,
                 credits: 4,
                 options: ['MATH 317', 'MATH 318', 'MATH 319']
             },
             electives: {
-                description: '8 additional hours from upper-division MATH',
+                description: '8 additional hours from upper-division MATH (at most one more from 317/318/319)',
                 count: 2,
                 credits: 8,
                 options: ['MATH 317', 'MATH 318', 'MATH 319', 'MATH 342', 'MATH 348', 'MATH 351', 'MATH 356', 'MATH 381', 'MATH 422', 'MATH 480', 'PHYS 354']
@@ -123,7 +127,7 @@ const REQUIREMENTS = {
                 { code: 'CSCI 144', title: 'Introduction to Computer Science', credits: 4 }
             ],
             supportingChoice: {
-                description: 'One additional supporting course',
+                description: 'One required supporting course from: CSCI 371, ECON 344, or PHYS 153/163',
                 count: 1,
                 credits: 4,
                 options: ['CSCI 371', 'ECON 344', 'PHYS 153']
