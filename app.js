@@ -183,15 +183,14 @@ async function handleSetupSubmit(e) {
     
     if (role === 'student') {
         const startYear = document.getElementById('setup-start-year').value;
-        const major = document.getElementById('setup-major').value;
-        
-        if (!startYear || !major) {
-            alert('Please fill in all student fields');
+        const majorSelect = document.getElementById('setup-major');
+        const majors = Array.from(majorSelect.selectedOptions).map(opt => opt.value);
+        if (!startYear || majors.length === 0) {
+            alert('Please fill in all student fields (select at least one major)');
             return;
         }
-        
         profileData.startYear = parseInt(startYear);
-        profileData.major = major;
+        profileData.majors = majors;
         
         // Create empty schedule
         const schedule = createEmptySchedule(profileData.startYear);
@@ -267,7 +266,8 @@ function showScheduleScreen() {
     
     document.getElementById('user-display').textContent = userProfile.name;
     document.getElementById('student-name').textContent = userProfile.name;
-    document.getElementById('student-major').textContent = userProfile.major + ' Major';
+    const majors = userProfile.majors || (userProfile.major ? [userProfile.major] : []);
+    document.getElementById('student-major').textContent = majors.join(', ') + (majors.length > 1 ? ' Majors' : ' Major');
     document.getElementById('grad-year').textContent = userProfile.startYear + 4;
     
     renderSchedule();
@@ -645,7 +645,7 @@ async function renderStudentList() {
             <div class="student-card" data-uid="${student.uid}">
                 <div class="student-card-name">${student.name}</div>
                 <div class="student-card-info">
-                    ${student.major} • Class of ${student.startYear + 4} • ${totalCourses} courses planned
+                    ${(student.majors ? student.majors.join(', ') : student.major)} • Class of ${student.startYear + 4} • ${totalCourses} courses planned
                 </div>
             </div>
         `;
