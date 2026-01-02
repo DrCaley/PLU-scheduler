@@ -519,6 +519,43 @@ const REQUIREMENTS = {
             ]
         },
         
+        // ==================== DATA SCIENCE ====================
+        'Data Science (B.S.)': {
+            name: 'Data Science (B.S.)',
+            totalCredits: 64,
+            required: [
+                { code: 'MATH 152', title: 'Calculus II', credits: 4 },
+                { code: 'MATH 331', title: 'Linear Algebra', credits: 4 },
+                { code: 'MATH 242', title: 'Introduction to Mathematical Statistics', credits: 4 },
+                { code: 'MATH 348', title: 'Statistical Computing and Consulting', credits: 4 },
+                { code: 'MATH 442', title: 'Statistical Modeling', credits: 4 },
+                { code: 'CSCI 144', title: 'Introduction to Computer Science', credits: 4 },
+                { code: 'CSCI 270', title: 'Data Structures', credits: 4 },
+                { code: 'CSCI 330', title: 'Introduction to Machine Learning', credits: 4 },
+                { code: 'DATA 233', title: 'Introduction to Data Science II', credits: 4 },
+                { code: 'DATA 499A', title: 'Capstone: Culminating Experience I', credits: 2 },
+                { code: 'DATA 499B', title: 'Capstone: Culminating Experience II', credits: 2 }
+            ],
+            electives: {
+                description: '12 hours math/stats electives from: MATH 253, 318, 422, or MATH/STAT 342',
+                count: 3,
+                credits: 12,
+                options: ['MATH 253', 'MATH 318', 'MATH 422', 'MATH 342']
+            },
+            electivesChoice: {
+                description: '8 hours CS electives from: CSCI 333, 367, 371, or 390',
+                count: 2,
+                credits: 8,
+                options: ['CSCI 333', 'CSCI 367', 'CSCI 371', 'CSCI 390']
+            },
+            supportingChoice: {
+                description: 'Domain-Specific Elective (4 cr)',
+                count: 1,
+                credits: 4,
+                options: ['BUSA 310', 'BUSA 467', 'COMA 461', 'ECON 344', 'ESCI 331', 'POLS 301', 'PSYC 242', 'SOCI 301']
+            }
+        },
+        
         // ==================== PSYCHOLOGY ====================
         'Psychology (B.A.)': {
             name: 'Psychology (B.A.)',
