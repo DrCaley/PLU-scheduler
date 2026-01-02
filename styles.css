@@ -610,7 +610,7 @@ header h1 {
 }
 
 #course-results {
-    max-height: 300px;
+    max-height: 400px;
     overflow-y: auto;
 }
 

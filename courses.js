@@ -324,7 +324,7 @@ function searchCourses(query) {
     const results = COURSES.filter(c => 
         c.code.toLowerCase().includes(q) || 
         c.title.toLowerCase().includes(q)
-    ).slice(0, 10);
+    );
     
     // If query looks like a GenEd combo (contains +), add it as an option
     if (isValidGenEdCombo(query)) {
