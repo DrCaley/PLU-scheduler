@@ -1054,6 +1054,10 @@ function renderGenEdSection(schedule) {
     
     // Check which GenEd requirements are satisfied by planned courses
     function checkGenEdReq(reqCode, reqCourse = null) {
+        // Check if generic placeholder is used (e.g., just "NW" or "IT")
+        if (plannedCourses.some(c => c.toUpperCase() === reqCode.toUpperCase())) {
+            return true;
+        }
         // If specific course required (like FYEP 101)
         if (reqCourse) {
             return plannedCourses.some(c => courseMatches(c, reqCourse));
@@ -1081,9 +1085,9 @@ function renderGenEdSection(schedule) {
         if (checkGenEdReq(req.code)) completedCount++;
     });
     
-    // Culminating (SR) - check if any 499 course is planned
+    // Culminating (SR) - check if any 499 course or SR placeholder is planned
     totalCount++;
-    if (plannedCourses.some(c => c.includes('499'))) completedCount++;
+    if (plannedCourses.some(c => c.includes('499') || c.toUpperCase() === 'SR')) completedCount++;
     
     const percent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
     

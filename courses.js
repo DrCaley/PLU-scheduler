@@ -1,5 +1,19 @@
 // Sample course catalog - would be loaded from PDF/database in production
 const COURSES = [
+    // Generic GenEd Placeholders (for planning before selecting specific courses)
+    { code: 'FW', title: 'First-Year Writing Requirement', credits: 4, prereqs: [], genEd: ['FW'], isPlaceholder: true },
+    { code: 'FD', title: 'First-Year Diversity Requirement', credits: 4, prereqs: [], genEd: ['FD'], isPlaceholder: true },
+    { code: 'RL', title: 'Academic Study of Religion Requirement', credits: 4, prereqs: [], genEd: ['RL'], isPlaceholder: true },
+    { code: 'FT', title: 'Fitness & Wellness Requirement', credits: 2, prereqs: [], genEd: ['FT'], isPlaceholder: true },
+    { code: 'GE', title: 'Global Engagement Requirement', credits: 4, prereqs: [], genEd: ['GE'], isPlaceholder: true },
+    { code: 'CX', title: 'Creative Expression Requirement', credits: 4, prereqs: [], genEd: ['CX'], isPlaceholder: true },
+    { code: 'NW', title: 'Engaging Natural World Requirement', credits: 4, prereqs: [], genEd: ['NW'], isPlaceholder: true },
+    { code: 'IT', title: 'Interpreting Text Requirement', credits: 4, prereqs: [], genEd: ['IT'], isPlaceholder: true },
+    { code: 'ES', title: 'Examining Self & Society Requirement', credits: 4, prereqs: [], genEd: ['ES'], isPlaceholder: true },
+    { code: 'VW', title: 'Exploring Values & Worldviews Requirement', credits: 4, prereqs: [], genEd: ['VW'], isPlaceholder: true },
+    { code: 'QR', title: 'Quantitative Reasoning Requirement', credits: 4, prereqs: [], genEd: ['QR'], isPlaceholder: true },
+    { code: 'SR', title: 'Senior Culminating Experience', credits: 2, prereqs: [], genEd: ['SR'], isPlaceholder: true },
+    
     // First-Year Experience Program (FYEP)
     { code: 'FYEP 101', title: 'First-Year Writing - FW', credits: 4, prereqs: [], genEd: ['FW'] },
     { code: 'FYEP 102', title: 'First-Year Diversity - FD', credits: 4, prereqs: [], genEd: ['FD'] },
