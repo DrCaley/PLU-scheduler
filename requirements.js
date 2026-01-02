@@ -769,18 +769,36 @@ function checkRequirements(majors, minors, schedule) {
                 if (completed) majorResult.completed++;
             });
             
+            // Track courses already used (required courses)
+            const usedCourses = new Set();
+            reqs.required.forEach(r => usedCourses.add(r.code.replace(/\s+/g, '').toUpperCase()));
+            
             // Check electives choice (e.g., "one of CSCI 367 or 390")
             if (reqs.electivesChoice) {
                 let choiceCompleted = 0;
+                const choiceCoursesCompleted = [];
                 reqs.electivesChoice.options.forEach(opt => {
-                    if (plannedCourses.some(c => courseMatches(c, opt))) {
-                        choiceCompleted++;
+                    const normalizedOpt = opt.replace(/\s+/g, '').toUpperCase();
+                    if (plannedCourses.some(c => courseMatches(c, opt)) && !usedCourses.has(normalizedOpt)) {
+                        if (choiceCompleted < reqs.electivesChoice.count) {
+                            choiceCompleted++;
+                            usedCourses.add(normalizedOpt);
+                            // Find course info
+                            const courseInfo = COURSES ? COURSES.find(c => courseMatches(c.code, opt)) : null;
+                            choiceCoursesCompleted.push({
+                                code: opt,
+                                title: courseInfo ? courseInfo.title : '',
+                                credits: courseInfo ? courseInfo.credits : 4,
+                                completed: true
+                            });
+                        }
                     }
                 });
                 majorResult.electivesChoice = {
                     description: reqs.electivesChoice.description,
                     required: reqs.electivesChoice.count,
-                    completed: Math.min(choiceCompleted, reqs.electivesChoice.count)
+                    completed: Math.min(choiceCompleted, reqs.electivesChoice.count),
+                    courses: choiceCoursesCompleted
                 };
                 majorResult.total += reqs.electivesChoice.count;
                 majorResult.completed += majorResult.electivesChoice.completed;
@@ -789,29 +807,44 @@ function checkRequirements(majors, minors, schedule) {
             // Check electives
             if (reqs.electives && reqs.electives.count > 0) {
                 let electivesCompleted = 0;
+                const electiveCoursesCompleted = [];
+                
                 plannedCourses.forEach(course => {
+                    const normalizedCourse = course.replace(/\s+/g, '').toUpperCase();
+                    // Skip if already used as required or electivesChoice
+                    if (usedCourses.has(normalizedCourse)) return;
+                    
+                    let isValidElective = false;
                     if (reqs.electives.options.length > 0) {
-                        if (reqs.electives.options.some(opt => courseMatches(course, opt))) {
-                            // Don't count if it's already a required course
-                            if (!reqs.required.some(r => courseMatches(course, r.code))) {
-                                electivesCompleted++;
-                            }
-                        }
+                        // Check if it's in the specific options list
+                        isValidElective = reqs.electives.options.some(opt => courseMatches(course, opt));
                     } else {
                         // Generic upper-division check
                         const prefix = course.split(/\s?\d/)[0];
                         const num = parseInt(course.match(/\d+/)?.[0] || '0');
                         const majorPrefix = getMajorPrefix(major);
-                        if (prefix === majorPrefix && num >= 300 && !reqs.required.some(r => courseMatches(course, r.code))) {
-                            electivesCompleted++;
-                        }
+                        isValidElective = (prefix === majorPrefix && num >= 300);
+                    }
+                    
+                    if (isValidElective && electivesCompleted < reqs.electives.count) {
+                        electivesCompleted++;
+                        usedCourses.add(normalizedCourse);
+                        // Find course info
+                        const courseInfo = COURSES ? COURSES.find(c => courseMatches(c.code, course)) : null;
+                        electiveCoursesCompleted.push({
+                            code: course,
+                            title: courseInfo ? courseInfo.title : '',
+                            credits: courseInfo ? courseInfo.credits : 4,
+                            completed: true
+                        });
                     }
                 });
                 
                 majorResult.electives = {
                     description: reqs.electives.description,
                     required: reqs.electives.count,
-                    completed: Math.min(electivesCompleted, reqs.electives.count)
+                    completed: Math.min(electivesCompleted, reqs.electives.count),
+                    courses: electiveCoursesCompleted
                 };
                 majorResult.total += reqs.electives.count;
                 majorResult.completed += majorResult.electives.completed;

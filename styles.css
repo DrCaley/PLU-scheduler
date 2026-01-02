@@ -990,6 +990,13 @@ header h1 {
     letter-spacing: 0.5px;
 }
 
+.req-desc {
+    font-size: 13px;
+    color: #718096;
+    margin-bottom: 10px;
+    font-style: italic;
+}
+
 .req-list {
     display: flex;
     flex-direction: column;

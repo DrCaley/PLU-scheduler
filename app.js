@@ -880,18 +880,86 @@ function renderRequirementSection(req, type, index) {
         html += '</div></div>';
     }
     
+    // Electives Choice (e.g., "one of CSCI 367 or 390")
+    if (req.electivesChoice) {
+        const elecComplete = req.electivesChoice.completed >= req.electivesChoice.required;
+        html += `
+            <div class="req-category">
+                <h4>Required Choice</h4>
+                <div class="req-desc">${req.electivesChoice.description}</div>
+                <div class="req-list">
+        `;
+        // Show completed choice courses
+        if (req.electivesChoice.courses && req.electivesChoice.courses.length > 0) {
+            req.electivesChoice.courses.forEach(course => {
+                html += `
+                    <div class="req-item completed">
+                        <div class="req-check">✓</div>
+                        <div class="req-details">
+                            <span class="req-code">${course.code}</span>
+                            <span class="req-title">${course.title}</span>
+                        </div>
+                        <span class="req-credits">${course.credits} cr</span>
+                    </div>
+                `;
+            });
+        }
+        // Show remaining slots needed
+        const remaining = req.electivesChoice.required - req.electivesChoice.completed;
+        for (let i = 0; i < remaining; i++) {
+            html += `
+                <div class="req-item incomplete">
+                    <div class="req-check">○</div>
+                    <div class="req-details">
+                        <span class="req-code">Choose 1</span>
+                        <span class="req-title">from options above</span>
+                    </div>
+                    <span class="req-credits">4 cr</span>
+                </div>
+            `;
+        }
+        html += '</div></div>';
+    }
+    
     // Electives
     if (req.electives) {
         const elecComplete = req.electives.completed >= req.electives.required;
         html += `
             <div class="req-category">
                 <h4>Electives</h4>
-                <div class="electives-box ${elecComplete ? 'complete' : ''}">
-                    <div class="elective-desc">${req.electives.description}</div>
-                    <div class="elective-progress">${req.electives.completed}/${req.electives.required} completed</div>
-                </div>
-            </div>
+                <div class="req-desc">${req.electives.description}</div>
+                <div class="req-list">
         `;
+        // Show completed elective courses
+        if (req.electives.courses && req.electives.courses.length > 0) {
+            req.electives.courses.forEach(course => {
+                html += `
+                    <div class="req-item completed">
+                        <div class="req-check">✓</div>
+                        <div class="req-details">
+                            <span class="req-code">${course.code}</span>
+                            <span class="req-title">${course.title}</span>
+                        </div>
+                        <span class="req-credits">${course.credits} cr</span>
+                    </div>
+                `;
+            });
+        }
+        // Show remaining slots needed
+        const remaining = req.electives.required - req.electives.completed;
+        for (let i = 0; i < remaining; i++) {
+            html += `
+                <div class="req-item incomplete">
+                    <div class="req-check">○</div>
+                    <div class="req-details">
+                        <span class="req-code">Elective ${req.electives.completed + i + 1}</span>
+                        <span class="req-title">upper-division course</span>
+                    </div>
+                    <span class="req-credits">4 cr</span>
+                </div>
+            `;
+        }
+        html += '</div></div>';
     }
     
     // Supporting courses
