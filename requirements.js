@@ -877,6 +877,59 @@ function checkRequirements(majors, minors, schedule) {
                 majorResult.completed += majorResult.supportingChoice.completed;
             }
             
+            // Check lab science requirement
+            if (reqs.labScience) {
+                let labScienceCompleted = false;
+                let completedOption = null;
+                let completedCourses = [];
+                
+                // Check each lab science option
+                for (const option of reqs.labScience.options) {
+                    const coursesInOption = option.courses;
+                    const completedInOption = coursesInOption.filter(course => 
+                        plannedCourses.some(c => courseMatches(c, course))
+                    );
+                    
+                    // Consider complete if at least 2 courses from an option are taken
+                    if (completedInOption.length >= 2) {
+                        labScienceCompleted = true;
+                        completedOption = option.name;
+                        completedCourses = completedInOption.map(code => {
+                            const courseInfo = COURSES ? COURSES.find(c => courseMatches(c.code, code)) : null;
+                            return {
+                                code: code,
+                                title: courseInfo ? courseInfo.title : '',
+                                credits: courseInfo ? courseInfo.credits : 4,
+                                completed: true
+                            };
+                        });
+                        break;
+                    } else if (completedInOption.length > 0 && !completedOption) {
+                        // Track partial progress
+                        completedOption = option.name + ' (partial)';
+                        completedCourses = completedInOption.map(code => {
+                            const courseInfo = COURSES ? COURSES.find(c => courseMatches(c.code, code)) : null;
+                            return {
+                                code: code,
+                                title: courseInfo ? courseInfo.title : '',
+                                credits: courseInfo ? courseInfo.credits : 4,
+                                completed: true
+                            };
+                        });
+                    }
+                }
+                
+                majorResult.labScience = {
+                    description: reqs.labScience.description,
+                    options: reqs.labScience.options,
+                    completed: labScienceCompleted,
+                    completedOption: completedOption,
+                    completedCourses: completedCourses
+                };
+                majorResult.total += 1;
+                if (labScienceCompleted) majorResult.completed += 1;
+            }
+            
             results.majors.push(majorResult);
         }
     });

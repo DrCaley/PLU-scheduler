@@ -986,6 +986,58 @@ function renderRequirementSection(req, type, index) {
         html += '</div></div>';
     }
     
+    // Lab Science requirement
+    if (req.labScience) {
+        html += `
+            <div class="req-category">
+                <h4>Natural Science Sequence</h4>
+                <div class="req-desc">${req.labScience.description}</div>
+                <div class="req-list">
+        `;
+        
+        // Show completed courses if any
+        if (req.labScience.completedCourses && req.labScience.completedCourses.length > 0) {
+            req.labScience.completedCourses.forEach(course => {
+                html += `
+                    <div class="req-item completed">
+                        <div class="req-check">✓</div>
+                        <div class="req-details">
+                            <span class="req-code">${course.code}</span>
+                            <span class="req-title">${course.title}</span>
+                        </div>
+                        <span class="req-credits">${course.credits} cr</span>
+                    </div>
+                `;
+            });
+        }
+        
+        // Show status or options
+        if (req.labScience.completed) {
+            html += `
+                <div class="req-item completed">
+                    <div class="req-check">✓</div>
+                    <div class="req-details">
+                        <span class="req-code">Sequence Complete</span>
+                        <span class="req-title">${req.labScience.completedOption}</span>
+                    </div>
+                    <span class="req-credits">8-10 cr</span>
+                </div>
+            `;
+        } else {
+            // Show available options
+            html += `<div class="lab-science-options">`;
+            html += `<div class="options-label">Choose one sequence:</div>`;
+            req.labScience.options.forEach(option => {
+                html += `<div class="option-group">
+                    <strong>${option.name}:</strong> ${option.courses.join(', ')}
+                </div>`;
+            });
+            html += `</div>`;
+        }
+        
+        html += '</div></div>';
+    }
+    
     html += '</div></div>';
     return html;
 }
