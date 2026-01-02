@@ -78,6 +78,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.close-btn').addEventListener('click', closeModal);
     document.getElementById('course-search').addEventListener('input', handleCourseSearch);
     
+    // Setup form major/minor tag handlers
+    document.getElementById('setup-add-major-btn').addEventListener('click', () => addTag('setup', 'major'));
+    document.getElementById('setup-add-minor-btn').addEventListener('click', () => addTag('setup', 'minor'));
+    
     // Profile modal event listeners
     document.getElementById('profile-btn').addEventListener('click', openProfileModal);
     document.getElementById('close-profile-modal').addEventListener('click', closeProfileModal);
@@ -86,6 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('profile-modal').addEventListener('click', (e) => {
         if (e.target.id === 'profile-modal') closeProfileModal();
     });
+    document.getElementById('profile-add-major-btn').addEventListener('click', () => addTag('profile', 'major'));
+    document.getElementById('profile-add-minor-btn').addEventListener('click', () => addTag('profile', 'minor'));
     
     // Faculty view tabs
     document.getElementById('tab-aggregate').addEventListener('click', () => switchFacultyTab('aggregate'));
@@ -192,12 +198,10 @@ async function handleSetupSubmit(e) {
     
     if (role === 'student') {
         const startYear = document.getElementById('setup-start-year').value;
-        const majorSelect = document.getElementById('setup-major');
-        const majors = Array.from(majorSelect.selectedOptions).map(opt => opt.value);
-        const minorSelect = document.getElementById('setup-minor');
-        const minors = Array.from(minorSelect.selectedOptions).map(opt => opt.value).filter(v => v !== '');
+        const majors = getTagValues('setup', 'major');
+        const minors = getTagValues('setup', 'minor');
         if (!startYear || majors.length === 0) {
-            alert('Please fill in all student fields (select at least one major)');
+            alert('Please fill in all student fields (add at least one major)');
             return;
         }
         profileData.startYear = parseInt(startYear);
@@ -299,19 +303,13 @@ function openProfileModal() {
     document.getElementById('profile-name').value = userProfile.name || '';
     document.getElementById('profile-email').value = currentUser.email || '';
     
-    // Set selected majors
-    const majorSelect = document.getElementById('profile-major');
+    // Populate majors as tags
     const majors = userProfile.majors || [];
-    Array.from(majorSelect.options).forEach(option => {
-        option.selected = majors.includes(option.value);
-    });
+    renderTags('profile', 'major', majors);
     
-    // Set selected minors
-    const minorSelect = document.getElementById('profile-minor');
+    // Populate minors as tags
     const minors = userProfile.minors || [];
-    Array.from(minorSelect.options).forEach(option => {
-        option.selected = minors.includes(option.value);
-    });
+    renderTags('profile', 'minor', minors);
     
     modal.classList.remove('hidden');
 }
@@ -323,13 +321,9 @@ function closeProfileModal() {
 async function handleProfileUpdate(e) {
     e.preventDefault();
     
-    // Get selected majors
-    const majorSelect = document.getElementById('profile-major');
-    const majors = Array.from(majorSelect.selectedOptions).map(opt => opt.value);
-    
-    // Get selected minors
-    const minorSelect = document.getElementById('profile-minor');
-    const minors = Array.from(minorSelect.selectedOptions).map(opt => opt.value).filter(v => v !== '');
+    // Get majors and minors from tags
+    const majors = getTagValues('profile', 'major');
+    const minors = getTagValues('profile', 'minor');
     
     if (majors.length === 0) {
         alert('Please select at least one major');
@@ -361,6 +355,79 @@ async function handleProfileUpdate(e) {
         console.error('Error updating profile:', error);
         alert('Failed to update profile: ' + error.message);
     }
+}
+
+// ==================== TAG MANAGEMENT ====================
+
+function addTag(prefix, type) {
+    const selectId = `${prefix}-${type}-select`;
+    const containerId = `${prefix}-${type}s-tags`;
+    
+    const select = document.getElementById(selectId);
+    const value = select.value;
+    
+    if (!value) return;
+    
+    // Check if already added
+    const existing = getTagValues(prefix, type);
+    if (existing.includes(value)) {
+        alert(`${value} is already added`);
+        select.value = '';
+        return;
+    }
+    
+    // Get display text from the selected option
+    const displayText = select.options[select.selectedIndex].text;
+    
+    // Add the tag
+    const container = document.getElementById(containerId);
+    const tag = createTagElement(value, displayText, prefix, type);
+    container.appendChild(tag);
+    
+    // Reset dropdown
+    select.value = '';
+}
+
+function createTagElement(value, displayText, prefix, type) {
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.dataset.value = value;
+    tag.innerHTML = `
+        ${displayText.replace(/\s*\([^)]*\)\s*$/, '')}
+        <button type="button" class="tag-remove" onclick="removeTag(this, '${prefix}', '${type}')">&times;</button>
+    `;
+    return tag;
+}
+
+function removeTag(btn, prefix, type) {
+    btn.parentElement.remove();
+}
+
+function getTagValues(prefix, type) {
+    const containerId = `${prefix}-${type}s-tags`;
+    const container = document.getElementById(containerId);
+    const tags = container.querySelectorAll('.tag');
+    return Array.from(tags).map(tag => tag.dataset.value);
+}
+
+function renderTags(prefix, type, values) {
+    const containerId = `${prefix}-${type}s-tags`;
+    const selectId = `${prefix}-${type}-select`;
+    const container = document.getElementById(containerId);
+    const select = document.getElementById(selectId);
+    
+    container.innerHTML = '';
+    
+    values.forEach(value => {
+        // Find display text from select options
+        let displayText = value;
+        const option = select.querySelector(`option[value="${value}"]`);
+        if (option) {
+            displayText = option.text;
+        }
+        const tag = createTagElement(value, displayText, prefix, type);
+        container.appendChild(tag);
+    });
 }
 
 function renderSchedule() {
