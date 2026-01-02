@@ -820,6 +820,9 @@ function renderRequirements() {
         }
     });
     
+    // General Education Requirements
+    html += renderGenEdSection(scheduleData);
+    
     container.innerHTML = html;
     
     // Add click handlers for expand/collapse
@@ -1037,6 +1040,161 @@ function renderRequirementSection(req, type, index) {
         
         html += '</div></div>';
     }
+    
+    html += '</div></div>';
+    return html;
+}
+
+// Render General Education Requirements section
+function renderGenEdSection(schedule) {
+    const genEd = REQUIREMENTS.generalEducation;
+    if (!genEd) return '';
+    
+    const plannedCourses = getPlannedCourses(schedule);
+    
+    // Check which GenEd requirements are satisfied by planned courses
+    function checkGenEdReq(reqCode, reqCourse = null) {
+        // If specific course required (like FYEP 101)
+        if (reqCourse) {
+            return plannedCourses.some(c => courseMatches(c, reqCourse));
+        }
+        // Otherwise check if any planned course has this GenEd attribute
+        return plannedCourses.some(c => {
+            const courseData = COURSES.find(cd => courseMatches(cd.code, c));
+            return courseData && courseData.genEd && courseData.genEd.includes(reqCode);
+        });
+    }
+    
+    // Count completed requirements
+    let completedCount = 0;
+    let totalCount = 0;
+    
+    // PLU Core
+    genEd.pluCore.requirements.forEach(req => {
+        totalCount++;
+        if (checkGenEdReq(req.code, req.course)) completedCount++;
+    });
+    
+    // Distributive Core
+    genEd.distributiveCore.requirements.forEach(req => {
+        totalCount++;
+        if (checkGenEdReq(req.code)) completedCount++;
+    });
+    
+    // Culminating (SR) - check if any 499 course is planned
+    totalCount++;
+    if (plannedCourses.some(c => c.includes('499'))) completedCount++;
+    
+    const percent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+    
+    let html = `
+        <div class="requirement-section">
+            <div class="requirement-header">
+                <h3>
+                    ${genEd.name}
+                    <span class="type-badge gened">Gen Ed</span>
+                </h3>
+                <div class="progress-info">
+                    <div class="progress-bar">
+                        <div class="fill" style="width: ${percent}%"></div>
+                    </div>
+                    <span class="progress-text">${completedCount}/${totalCount} (${percent}%)</span>
+                    <span class="collapse-icon">▼</span>
+                </div>
+            </div>
+            <div class="requirement-body">
+    `;
+    
+    // PLU Core section
+    html += `
+        <div class="req-category">
+            <h4>${genEd.pluCore.name}</h4>
+            <div class="req-list">
+    `;
+    
+    genEd.pluCore.requirements.forEach(req => {
+        const completed = checkGenEdReq(req.code, req.course);
+        const statusClass = completed ? 'completed' : 'incomplete';
+        const checkIcon = completed ? '✓' : '○';
+        const coursesText = req.course ? req.course : req.description;
+        
+        html += `
+            <div class="req-item ${statusClass}">
+                <div class="req-check">${checkIcon}</div>
+                <div class="req-details">
+                    <span class="req-code">${req.code}</span>
+                    <span class="req-title">${req.name}</span>
+                    <span class="req-note">${coursesText}</span>
+                </div>
+                <span class="req-credits">${req.credits} cr</span>
+            </div>
+        `;
+    });
+    
+    html += '</div></div>';
+    
+    // Distributive Core section
+    html += `
+        <div class="req-category">
+            <h4>${genEd.distributiveCore.name}</h4>
+            <div class="req-desc">${genEd.distributiveCore.description}</div>
+            <div class="req-list">
+    `;
+    
+    genEd.distributiveCore.requirements.forEach(req => {
+        const completed = checkGenEdReq(req.code);
+        const statusClass = completed ? 'completed' : 'incomplete';
+        const checkIcon = completed ? '✓' : '○';
+        
+        // Find which course satisfies this if completed
+        let satisfyingCourse = '';
+        if (completed) {
+            const course = plannedCourses.find(c => {
+                const courseData = COURSES.find(cd => courseMatches(cd.code, c));
+                return courseData && courseData.genEd && courseData.genEd.includes(req.code);
+            });
+            if (course) satisfyingCourse = ` (${course})`;
+        }
+        
+        html += `
+            <div class="req-item ${statusClass}">
+                <div class="req-check">${checkIcon}</div>
+                <div class="req-details">
+                    <span class="req-code">${req.code}</span>
+                    <span class="req-title">${req.name}${satisfyingCourse}</span>
+                    <span class="req-note">${req.description}${req.note ? ' - ' + req.note : ''}</span>
+                </div>
+                <span class="req-credits">${req.credits} cr</span>
+            </div>
+        `;
+    });
+    
+    html += '</div></div>';
+    
+    // Culminating Experience
+    html += `
+        <div class="req-category">
+            <h4>${genEd.culminating.name}</h4>
+            <div class="req-list">
+    `;
+    
+    const srCompleted = plannedCourses.some(c => c.includes('499'));
+    const srStatusClass = srCompleted ? 'completed' : 'incomplete';
+    const srCheckIcon = srCompleted ? '✓' : '○';
+    
+    html += `
+        <div class="req-item ${srStatusClass}">
+            <div class="req-check">${srCheckIcon}</div>
+            <div class="req-details">
+                <span class="req-code">SR</span>
+                <span class="req-title">Senior Culminating Experience</span>
+                <span class="req-note">Senior seminar or capstone in your major</span>
+            </div>
+            <span class="req-credits">1-4 cr</span>
+        </div>
+    `;
+    
+    html += '</div></div>';
     
     html += '</div></div>';
     return html;

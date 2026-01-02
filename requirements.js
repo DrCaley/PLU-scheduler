@@ -742,20 +742,108 @@ const REQUIREMENTS = {
     
     // General Education Requirements (PLU Core)
     generalEducation: {
-        name: 'General Education (PLU Core)',
-        categories: [
-            { name: 'First Year Experience', code: 'FYE', credits: 4 },
-            { name: 'Writing', code: 'WRIT', credits: 4, courses: ['WRIT 101'] },
-            { name: 'Quantitative Reasoning', code: 'QR', credits: 4, courses: ['MATH 105', 'MATH 107', 'MATH 115', 'MATH 123', 'MATH 128', 'MATH 140', 'MATH 145', 'MATH 151', 'MATH 152', 'MATH 242'] },
-            { name: 'Natural World', code: 'NW', credits: 8, description: 'Two courses with lab' },
-            { name: 'Arts', code: 'ARTS', credits: 4 },
-            { name: 'Literature', code: 'LIT', credits: 4 },
-            { name: 'Social Sciences', code: 'SS', credits: 4 },
-            { name: 'Philosophical Inquiry', code: 'PI', credits: 4 },
-            { name: 'Religious Studies', code: 'RS', credits: 8, description: 'Two courses' },
-            { name: 'Cross-Cultural Perspectives', code: 'CCP', credits: 4 },
-            { name: 'Senior Seminar', code: 'SR', credits: 2, description: 'Capstone in major' }
-        ]
+        name: 'General Education Requirements',
+        totalCredits: '40-47',
+        pluCore: {
+            name: 'PLU Core (15-19 credits)',
+            requirements: [
+                { 
+                    code: 'FW', 
+                    name: 'First-Year Writing', 
+                    credits: 4, 
+                    course: 'FYEP 101',
+                    description: 'Required for all first-year students'
+                },
+                { 
+                    code: 'FD', 
+                    name: 'First-Year Diversity', 
+                    credits: 4, 
+                    course: 'FYEP 102',
+                    description: 'Required for all first-year students'
+                },
+                { 
+                    code: 'PLUS', 
+                    name: 'PLU Seminar', 
+                    credits: 1, 
+                    course: 'PLUS 100',
+                    description: 'Required for all first-year students in first year'
+                },
+                { 
+                    code: 'RL', 
+                    name: 'Academic Study of Religion', 
+                    credits: 4, 
+                    description: 'Any course with RL attribute'
+                },
+                { 
+                    code: 'FT', 
+                    name: 'Fitness and Wellness', 
+                    credits: 2, 
+                    description: 'FTWL 100 (1cr) + one activity course (1cr)',
+                    note: 'Cannot use FTWL 250'
+                },
+                { 
+                    code: 'GE', 
+                    name: 'Global Engagement', 
+                    credits: 4, 
+                    description: 'Any course with GE attribute (study away or on-campus)'
+                }
+            ]
+        },
+        distributiveCore: {
+            name: 'Distributive Core (24 credits)',
+            description: 'Six Ways of Being and Knowing - each must be from a different program prefix',
+            requirements: [
+                { 
+                    code: 'CX', 
+                    name: 'Creative Expression', 
+                    credits: 4, 
+                    description: 'Any course with CX attribute'
+                },
+                { 
+                    code: 'NW', 
+                    name: 'Engaging the Natural World', 
+                    credits: 4, 
+                    description: 'Any course with NW attribute (includes lab/field experience)',
+                    note: 'Must include lab or field experience'
+                },
+                { 
+                    code: 'IT', 
+                    name: 'Interpreting Text', 
+                    credits: 4, 
+                    description: 'Any course with IT attribute'
+                },
+                { 
+                    code: 'ES', 
+                    name: 'Examining Self and Society', 
+                    credits: 4, 
+                    description: 'Any course with ES attribute'
+                },
+                { 
+                    code: 'VW', 
+                    name: 'Exploring Values and Worldviews', 
+                    credits: 4, 
+                    description: 'Any course with VW attribute'
+                },
+                { 
+                    code: 'QR', 
+                    name: 'Quantitative Reasoning', 
+                    credits: 4, 
+                    description: 'Any course with QR attribute',
+                    note: 'Can be satisfied by Math Placement score of 70+'
+                }
+            ]
+        },
+        culminating: {
+            name: 'Culminating Experience (1-4 credits)',
+            requirements: [
+                { 
+                    code: 'SR', 
+                    name: 'Senior Culminating Experience', 
+                    credits: '1-4', 
+                    description: 'Senior seminar or capstone in your major'
+                }
+            ]
+        }
     }
 };
 

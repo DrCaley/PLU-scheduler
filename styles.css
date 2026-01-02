@@ -933,6 +933,10 @@ header h1 {
     background: #38a169;
 }
 
+.requirement-header h3 .type-badge.gened {
+    background: #805ad5;
+}
+
 .progress-info {
     display: flex;
     align-items: center;
@@ -1054,6 +1058,14 @@ header h1 {
 .req-title {
     color: #666;
     font-size: 14px;
+}
+
+.req-note {
+    display: block;
+    color: #888;
+    font-size: 12px;
+    margin-top: 2px;
+    font-style: italic;
 }
 
 .req-credits {
