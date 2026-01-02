@@ -554,18 +554,19 @@ const REQUIREMENTS = {
     minors: {
         'Computer Science': {
             name: 'Computer Science Minor',
+            totalCredits: 20,
             required: [
                 { code: 'CSCI 144', title: 'Introduction to Computer Science', credits: 4 },
                 { code: 'CSCI 270', title: 'Data Structures', credits: 4 }
             ],
             electives: {
-                description: '8 hours of upper-division CSCI (above 300, except 499A/B)',
+                description: '8 hours of upper-division CSCI courses above 300 (except 499A/B)',
                 count: 2,
                 credits: 8,
                 options: ['CSCI 302', 'CSCI 313', 'CSCI 330', 'CSCI 333', 'CSCI 343', 'CSCI 367', 'CSCI 371', 'CSCI 386', 'CSCI 390', 'CSCI 412', 'CSCI 444']
             },
             supportingChoice: {
-                description: 'MATH 128, 151, or equivalent',
+                description: 'Required supporting: MATH 128, 151, or equivalent',
                 count: 1,
                 credits: 4,
                 options: ['MATH 128', 'MATH 151']
@@ -573,6 +574,7 @@ const REQUIREMENTS = {
         },
         'Mathematics': {
             name: 'Mathematics Minor',
+            totalCredits: 16,
             required: [
                 { code: 'MATH 152', title: 'Calculus II', credits: 4 }
             ],
@@ -583,10 +585,36 @@ const REQUIREMENTS = {
                 options: ['MATH 245', 'MATH 253']
             },
             electives: {
-                description: '8 hours of upper-division Mathematics',
+                description: '8 hours of upper-division math (may include PHYS 354; at most one of 245/318; at most one of 351/354)',
                 count: 2,
                 credits: 8,
                 options: ['MATH 317', 'MATH 318', 'MATH 319', 'MATH 331', 'MATH 342', 'MATH 348', 'MATH 351', 'MATH 356', 'MATH 422', 'MATH 433', 'MATH 455', 'PHYS 354']
+            }
+        },
+        'Data Science': {
+            name: 'Data Science Minor',
+            totalCredits: 20,
+            electivesChoice: {
+                description: 'Computational Foundation: DATA 133 or CSCI 144',
+                count: 1,
+                credits: 4,
+                options: ['DATA 133', 'CSCI 144']
+            },
+            required: [
+                { code: 'DATA 233', title: 'Introduction to Data Science II', credits: 4 },
+                { code: 'MATH 348', title: 'Statistical Computing and Consulting', credits: 4 }
+            ],
+            supportingChoice: {
+                description: 'Statistical Foundation: one statistics course',
+                count: 1,
+                credits: 4,
+                options: ['MATH 145', 'STAT 145', 'STAT 231', 'STAT 232', 'STAT 233', 'MATH 242']
+            },
+            electives: {
+                description: 'Domain-Specific Elective (4 cr): from approved list',
+                count: 1,
+                credits: 4,
+                options: ['BUSA 310', 'BUSA 467', 'COMA 461', 'CSCI 330', 'CSCI 333', 'CSCI 367', 'ECON 344', 'ESCI 331', 'POLS 301', 'PSYC 242', 'SOCI 301']
             }
         },
         'Statistics': {
@@ -649,19 +677,6 @@ const REQUIREMENTS = {
                 count: 1,
                 credits: 1,
                 options: ['CHEM 334', 'CHEM 336']
-            }
-        },
-        'Data Science': {
-            name: 'Data Science Minor',
-            required: [
-                { code: 'DATA 133', title: 'Introduction to Data Science', credits: 4 },
-                { code: 'CSCI 144', title: 'Introduction to Computer Science', credits: 4 }
-            ],
-            electives: {
-                description: 'Data Science electives',
-                count: 2,
-                credits: 8,
-                options: ['CSCI 330', 'CSCI 367', 'MATH 242', 'MATH 348']
             }
         },
         'Psychology': {
